@@ -1,0 +1,15 @@
+outcome,country,LIC,LDC,mean,std,shift,cum2,cum4,cum6
+IPD,Kenya,0,0,76,43.8,16.1,7,12.4,20.3
+IPD,Mozambique,1,1,67.2,46.9,-1.8,4.9,11.1,18.3
+IPD,South_Africa,0,0,42.5,31.7,0,8.2,18.9,35.3
+pneumococcal_meningitis,Burkina_Faso,1,1,27,15.5,0,8.5,35.8,49.5
+pneumococcal_meningitis,Kenya,0,0,42,41.9,0,21,27.7,41.3
+pneumococcal_meningitis,Niger,1,1,47.4,26.3,20.3,15.2,28.8,45
+pneumococcal_meningitis,South_Africa,0,0,40.7,19.6,11.5,10.6,22.9,47.8
+pneumococcal_meningitis,Uganda,1,1,42.7,37.7,0,13.7,28.4,44.2
+hospitalised_clinical_pneumonia,CAR,1,1,47.1,45.3,-4,4.4,19.7,31.4
+hospitalised_clinical_pneumonia,Malawi,1,1,39,33.8,-4,0.6,17,31.5
+hospitalised_clinical_pneumonia,South_Africa,0,0,38.5,29.3,0,7.7,26.7,38.7
+radiographic_pneumonia,CAR,1,1,42.4,33.1,0,3.6,18.5,32.2
+radiographic_pneumonia,Malawi,1,1,47.6,42.2,-4,0.3,7.7,22.4
+radiographic_pneumonia,South_Africa,0,0,54.4,47.5,0,5.4,17.5,32.9

@@ -1,0 +1,8 @@
+Parameter,Lower_Bound,Upper_Bound,UL_Difference
+Vaccine price ($1.73-$8.63),104.98,484.24,379.26
+Vaccine wastage (0%-10%),461.42,506.86,45.44
+Operational costs (±50%),459.79,508.67,48.88
+Healthcare costs (±20%),492.44,476.03,16.41
+Vaccine effectiveness (50%-90%),747.95,396.76,351.19
+Vaccine coverage (70%-97%),503.32,484.24,19.08
+Discounting (0%-5%),235.48,697.78,462.3
