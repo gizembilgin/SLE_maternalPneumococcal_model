@@ -38,9 +38,9 @@ if (maternal_vaccine_on == "Y"){
 if (mat_waning == "standard"){
   wan = 0.2520  # standard fit to average of all serotypes waning
 } else if (mat_waning == "slower"){
-  wan = 0.2155  # slower waning
+  wan = 0.215467019  # slower waning
 } else if (mat_waning == "faster"){
-  wan = 0.3710  # faster waning
+  wan = 0.371026823  # faster waning
 }else{
   warning("mode of maternal waning not selected, assuming standard mat_waning")
   wan = 0.4405  # standard fit to average of all serotypes waning
@@ -87,19 +87,9 @@ for (i in 1:num_age_groups){ #across age classes
 }
 
 # Step Three: distribute across maternal classes
-for (i in 1:9){
-  #COMEBACK 
-  if (i %in% c(1:2)){
-    j=1
-  } else if (i %in% c(3:4)){
-    j=2
-  } else if (i %in% c(5:6)){
-    j=3
-  } else if (i %in% c(7:9)){
-    j=i-3
-  }
-  
-  mcov_true=mcov*(wan^(j-1))
+for (i in 1:12){
+
+  mcov_true=mcov*(wan^(i-1))
   
   Sm_inital[i]=mcov_true*S_inital[i]
   S_inital[i]=(1-mcov_true)*S_inital[i]

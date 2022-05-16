@@ -1,13 +1,13 @@
 {
     "dialog-state": {
-        "query": "carriage",
+        "query": "population not configured correctly",
         "path": "",
         "regex": false,
         "caseSensitive": false,
-        "wholeWord": false,
+        "wholeWord": true,
         "filePatterns": [],
         "excludeFilePatterns": [],
-        "resultsCount": 72,
+        "resultsCount": 1,
         "errorCount": 0,
         "replaceErrors": "",
         "projectRelative": true

@@ -4,7 +4,8 @@
 ###### SETUP
 ################################################################################
 #list of age groups to calculate for
-age_group_list = c(2,4,6,8,10,12,24,60) 
+#age_group_list = c(2,4,6,8,10,12,24,60) 
+age_group_list = c(1:24,60) 
 #creating time sequence to plot over
 num_weeks=52*3
 X=seq(1,num_weeks)

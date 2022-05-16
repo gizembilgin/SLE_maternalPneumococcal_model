@@ -1,5 +1,6 @@
 #      This section will run the ode multiple times while aging the cohort over time
 
+SOME = 1/ageing_step #COMEBACK - if you want to merge with normal (4) time step
 parameters = c(nu=nu,
                mu=mu,
                recovery=recovery,
@@ -14,14 +15,14 @@ parameters = c(nu=nu,
 
 #first time step
 sol = as.data.frame(ode(y=state,times=(seq(0,time_step,by=1)),func=pneumODE,parms=parameters))
-#output is time and then a column for all 17*14=238 classes
 
 #initalising solution log
 sol_log <- sol
 sol_log_unedited <- sol
 
-for (increments_number in 2:num_model_increments){
-  
+
+for (increments_number in 2:(model_years*365)){
+
   time_now = increments_number*time_step
   
   #selecting bottom row of solution which is time=60 and then 238 classes
@@ -59,86 +60,84 @@ for (increments_number in 2:num_model_increments){
   #initalise next state
   next_state=prev_state
   
-  if (time_now %% ageing_step == 0){
+    # first age group (new births)
+    #set 0-2 months to zero, then assume all children born susceptible
+  next_state[,1] = 0 + (1-SOME)*prev_state[,1]
+  next_state[1,1] = nu*(1-mcov)*SOME + (1-SOME)*prev_state[1,1] #S
+  next_state[9,1] = nu*mcov*SOME + (1-SOME)*prev_state[9,1]     #Sm
     
-  # first age group (new births)
-  #set 0-2 months to zero, then assume all children born susceptible
-  next_state[,1] = 0
-  next_state[1,1] = nu*(1-mcov) #S
-  next_state[9,1] = nu*mcov     #Sm
-  
-  
-  # vaccination rounds #########################################################
-  # second age group 
-  # apply first dose
-  for (i in 1:2){ #for normal classes and then maternally immunised
-    for (j in 1:2){ #for S then I
-      next_state[1+4*(j-1)+8*(i-1),PCV_start_bracket[1]]=prev_state[1+4*(j-1)+8*(i-1),PCV_start_bracket[1]-1]*(1-pcvcov[1])
-      next_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[1]]=prev_state[1+4*(j-1)+8*(i-1),PCV_start_bracket[1]-1]*pcvcov[1]
+    
+    # vaccination rounds #########################################################
+    # second age group 
+    # apply first dose
+    for (i in 1:2){ #for normal classes and then maternally immunised
+      for (j in 1:2){ #for S then I
+        next_state[1+4*(j-1)+8*(i-1),PCV_start_bracket[1]]=prev_state[1+4*(j-1)+8*(i-1),PCV_start_bracket[1]-1]*(1-pcvcov[1])*SOME + (1-SOME)*prev_state[1+4*(j-1)+8*(i-1),PCV_start_bracket[1]]
+        next_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[1]]=prev_state[1+4*(j-1)+8*(i-1),PCV_start_bracket[1]-1]*pcvcov[1]*SOME + (1-SOME)*prev_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[1]]
+      }
     }
-  }
-  
-  # third age group 
-  # apply second dose
-  for (i in 1:16){ #shift all other age classes up
-    next_state[i,PCV_start_bracket[2]]=prev_state[i,PCV_start_bracket[2]-1]
-  }
-  for (i in 1:2){ #for normal classes and then maternally immunised
-    for (j in 1:2){ #for S then I
-      next_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[2]]=prev_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[2]-1]*(1-pcvcov[2])
-      next_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[2]]=prev_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[2]-1]*pcvcov[2]
+    
+    # third age group 
+    # apply second dose
+    for (i in 1:16){ #shift all other age classes up
+      next_state[i,PCV_start_bracket[2]]=prev_state[i,PCV_start_bracket[2]-1]*SOME + (1-SOME)*prev_state[i,PCV_start_bracket[2]]
     }
-  }
-  
-  #fourth age group
-  #apply third dose
-  for (i in 1:16){ #shift all other age classes up
-    next_state[i,PCV_start_bracket[3]]=prev_state[i,PCV_start_bracket[3]-1]
-  }
-  for (i in 1:2){ #for normal classes and then maternally immunised
-    for (j in 1:2){ #for S then I
-      next_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[3]]=prev_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[3]-1]*(1-pcvcov[3])
-      next_state[4+4*(j-1)+8*(i-1),PCV_start_bracket[3]]=prev_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[3]-1]*pcvcov[3]
+    for (i in 1:2){ #for normal classes and then maternally immunised
+      for (j in 1:2){ #for S then I
+        next_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[2]]=prev_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[2]-1]*(1-pcvcov[2])*SOME + (1-SOME)*prev_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[2]]
+        next_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[2]]=prev_state[2+4*(j-1)+8*(i-1),PCV_start_bracket[2]-1]*pcvcov[2]*SOME + (1-SOME)*prev_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[2]]
+      }
     }
-  }
-  #end vaccination
-  
-  
-  #now just shift all non-PCV immunisation stage age classes up ################
-  
-  #8 month - 2 year olds
-  list_included = c(2:(num_age_groups-2))
-  list_included = list_included[!(list_included) %in% PCV_start_bracket]
-  for (i in list_included){ next_state[,i]=prev_state[,(i-1)]  }
-  
-  #modified stepping for 2-5 and 5+ since not a complete shift up
-  next_state[,num_age_groups-1]=prev_state[,num_age_groups-2]+(35/36)*prev_state[,num_age_groups-1]
-  next_state[,num_age_groups]=(1/36)*prev_state[,num_age_groups-1]+prev_state[,num_age_groups]
-  
-  #deaths #####################################################################
-  #deaths proportional to group size, assuming only from over 5
-  for (i in 1:num_age_groups){
-    total=sum(next_state[,i])
-    next_state[,i]=next_state[,i]-mu[i]*(next_state[,i]/total)
-  }
-  
-  }  
+    
+    #fourth age group
+    #apply third dose
+    for (i in 1:16){ #shift all other age classes up
+      next_state[i,PCV_start_bracket[3]]=prev_state[i,PCV_start_bracket[3]-1]*SOME + (1-SOME)*prev_state[i,PCV_start_bracket[3]]
+    }
+    for (i in 1:2){ #for normal classes and then maternally immunised
+      for (j in 1:2){ #for S then I
+        next_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[3]]=prev_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[3]-1]*(1-pcvcov[3])*SOME + (1-SOME)*prev_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[3]]
+        next_state[4+4*(j-1)+8*(i-1),PCV_start_bracket[3]]=prev_state[3+4*(j-1)+8*(i-1),PCV_start_bracket[3]-1]*pcvcov[3]*SOME + (1-SOME)*prev_state[4+4*(j-1)+8*(i-1),PCV_start_bracket[3]]
+      }
+    }
+    #end vaccination
+    
+    
+    #now just shift all non-PCV immunisation stage age classes up ################
+    
+    #8 month - 2 year olds
+    list_included = c(2:(num_age_groups-2))
+    list_included = list_included[!(list_included) %in% PCV_start_bracket]
+    for (i in list_included){ next_state[,i]=prev_state[,(i-1)]*SOME + (1-SOME)*prev_state[,i]}
+    
+    #modified stepping for 2-5 and 5+ since not a complete shift up
+    next_state[,num_age_groups-1]=prev_state[,num_age_groups-2]*SOME+(35/36)*prev_state[,num_age_groups-1]*SOME + (1-SOME)*prev_state[,num_age_groups-1]
+    next_state[,num_age_groups]=(1/36)*prev_state[,num_age_groups-1]*SOME+prev_state[,num_age_groups]*SOME + (1-SOME)*prev_state[,num_age_groups]
+    
+    #deaths #####################################################################
+    #deaths proportional to group size, assuming only from over 5
+    for (i in 1:num_age_groups){
+      total=sum(next_state[,i])
+      next_state[,i]=next_state[,i]-mu[i]*(next_state[,i]/total)*SOME
+    }
+    
+   
   
   
   if (time_now %% 30 == 0){ #make sure maternal waning stays at monthly (since param calculated this way)
-  #waning maternal immunity as an exponential ###################################
-  for (i in 1:2){ #S and I
-    for (j in 1:4){ #S,V1,V2,V3
-      for (k in 1:11) { #age groups
-        next_state[j+(i-1)*4,k+1] = next_state[j+(i-1)*4,k+1]+wan*next_state[j+(i-1)*4+8,k+1]
-        next_state[j+(i-1)*4+8,k+1] = (1-wan)*next_state[j+(i-1)*4+8,k+1]
-      }
-      for (k in 12){ #cut off maternal immunity after 12 months
-        next_state[j+(i-1)*4,k+1] = next_state[j+(i-1)*4,k+1]+next_state[j+(i-1)*4+8,k+1]
-        next_state[j+(i-1)*4+8,k+1] = 0
+    #waning maternal immunity as an exponential ###################################
+    for (i in 1:2){ #S and I
+      for (j in 1:4){ #S,V1,V2,V3
+        for (k in 1:11) { #age groups
+          next_state[j+(i-1)*4,k+1] = next_state[j+(i-1)*4,k+1]+wan*next_state[j+(i-1)*4+8,k+1]
+          next_state[j+(i-1)*4+8,k+1] = (1-wan)*next_state[j+(i-1)*4+8,k+1]
+        }
+        for (k in 12){ #cut off maternal immunity after 12 months
+          next_state[j+(i-1)*4,k+1] = next_state[j+(i-1)*4,k+1]+next_state[j+(i-1)*4+8,k+1]
+          next_state[j+(i-1)*4+8,k+1] = 0
+        }
       }
     }
-  }
   }
   
   if (round(sum(next_state)) != round(sum(prev_state))){stop('population fluctating! next_state !=prev_state')}
@@ -175,8 +174,8 @@ for (increments_number in 2:num_model_increments){
   sol_log <- rbind(sol_log,sol)
   
   sol_log_unedited <- rbind(sol_log_unedited,sol)
-  
-}
+}  
+
 
 ### INCIDENCE CALCULATIONS 
 incidence_log <- sol_log_unedited %>% select(1, ((num_classes-1)*num_age_groups+2):(num_classes*num_age_groups+1)) 
@@ -195,7 +194,7 @@ prevalence=rep(0,num_age_groups)
 for (i in 1:num_age_groups){
   total_infected = Is[1,i]+Iv1[1,i]+Iv2[1,i]+Iv3[1,i]+Ism[1,i]+Iv1m[1,i]+Iv2m[1,i]+Iv3m[1,i]
   prevalence[i]=100*total_infected/P_inital[i]
-
+  
 }
 
 
