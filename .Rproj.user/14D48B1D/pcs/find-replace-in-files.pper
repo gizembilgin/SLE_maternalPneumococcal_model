@@ -1,13 +1,13 @@
 {
     "dialog-state": {
-        "query": "population not configured correctly",
+        "query": "library",
         "path": "",
         "regex": false,
         "caseSensitive": false,
         "wholeWord": true,
         "filePatterns": [],
         "excludeFilePatterns": [],
-        "resultsCount": 1,
+        "resultsCount": 16,
         "errorCount": 0,
         "replaceErrors": "",
         "projectRelative": true

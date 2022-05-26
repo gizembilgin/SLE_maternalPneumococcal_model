@@ -3,7 +3,7 @@
 if (maternal_vaccine_on == "Y"){
   mcov = 0.9743  # maternal vaccine coverage, currently assumed to be equal to single dose of tetanus during pregnancy
   meff = 0.75  # maternal vaccine effectiveness
-  #meff = 0.75  # maternal vaccine effectiveness
+  #meff = 0.81  # maternal vaccine effectiveness
 } else if (maternal_vaccine_on == "N"){
   mcov = 0
   meff = 0

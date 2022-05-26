@@ -1,7 +1,6 @@
 #NOTE: costs are all expressed in 2020 USD
 #COMBEBACK COUNT = <working>
-library(dplyr)
-library(tidyr)
+
 
 ###user toggles
 costing = "rand" #options: fixed, rand
@@ -19,7 +18,7 @@ price_per_dose = 8.63  # 8.63 compared to 2.90 GAVI price for PCV (sensitivity a
 #price_per_dose = 0.137
 #price_per_dose = 2.90*8.63/14.5
 
-wastage = 0.05               # % of doses
+wastage = 0.05               # % of doses (default 0.05)
 
 freight_costs = 0.045         # % of vaccine value
 injection_equipment = 0.044   # equipment required per dose of vaccine
@@ -28,6 +27,7 @@ injection_equipment_wastage = 0.1 # % of injection equipment
 vaccine_cost_per_dose = price_per_dose * (1 + wastage) * (1 + freight_costs) + injection_equipment * (1+injection_equipment_wastage)
 vaccine_cost_100000 = mcov * 100000 * vaccine_cost_per_dose
 
+#outputs for Table 4
 # dose_cost = mcov * 100000 * price_per_dose
 # wastage_cost = mcov * 100000 * price_per_dose * (wastage + wastage*freight_costs/2)
 # freight_cost = mcov * 100000 * price_per_dose * (freight_costs + wastage*freight_costs/2)
@@ -128,15 +128,14 @@ cost_averted = cost_averted
 ###(D/D) 
 total_cost_care_averted=sum(cost_averted)
 
-total_cost_care_averted=total_cost_care_averted*1.0 #torando plot
+total_cost_care_averted=total_cost_care_averted*1 #torando plot
 ################################################################################
 
 
 
 #       (3/3) Cost-effectiveness Analysis               
 ################################################################################
-source("~/PhD/Research/1_maternal_pneumococcal/code/R/(99)_conversion to DALYs.R")
-
+source(paste(getwd(),"/(99)_conversion to DALYs.R",sep=""))
 
 #Note: this will be the cost per 100,000
 cost_final = total_intervention_costs_100000 - total_cost_care_averted
@@ -211,7 +210,8 @@ cost_summary <-
                    UPI = round(mean(cost)+qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2)
   ) 
 
-
+#summary_over_runs
+summary_over_runs$average_cost[summary_over_runs$outcome == 'cost_DALY_averted']
 
 # LIMITATION WARNING: this 'uncertainty' is taken from running the model x number of times with different population values for parameters
 #         True stochasticity would have each individual sample from the probability distribution (lots of computational power)

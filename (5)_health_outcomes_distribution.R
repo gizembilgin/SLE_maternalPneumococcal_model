@@ -14,9 +14,6 @@ X=seq(1,num_weeks)
 subset_LIC = "off"      #decision not to subset, as report suggestions no significant difference within regions, + need to smooth curve
 inform_up_to_6 ="fitted" #options:"reported","fitted"   #decision to use fitted as report notes cases <2 severely under reported
 
-library(ggplot2)
-library(dplyr)
-library(ConnMatTools)
 ################################################################################
 
 

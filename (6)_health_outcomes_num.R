@@ -56,7 +56,7 @@ burden_dataset_applied_U1
 
 
 # reduction in cases under one
-reduction_incidence_under_one = ave(as.numeric(final_results[1,1:12]))
-reduction_incidence_under_one = reduction_incidence_under_one[1]*100 #now in 100,000
+reduction_incidence_under_one = mean(as.numeric(final_results[1,1:12]))
+reduction_incidence_under_one = reduction_incidence_under_one*100 #now in 100,000
 reduction_incidence_under_one
 

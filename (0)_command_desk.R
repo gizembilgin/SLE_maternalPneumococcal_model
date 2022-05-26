@@ -12,6 +12,8 @@
 #rm(list=ls()) # clear global environment
 time.start=proc.time()[[3]] #let's see how long this runs for
 library(deSolve)
+library(ConnMatTools)
+library(ggplot2)
 library(dplyr)
 library(tidyverse)
 #####################################################################
@@ -146,6 +148,11 @@ health_outcome_0 <- health_outcome_0 %>%
 health_outcome_1 <- aggregate(health_outcome_0$effect, by=list(category=health_outcome_0$outcome), FUN=sum)
 source(paste(getwd(),"/(6)_health_outcomes_num.R",sep=""))
 
+#quick fix of signs
+burden_dataset_applied$maternal_vaccine_reduction = abs(burden_dataset_applied$maternal_vaccine_reduction)
+burden_dataset_applied$maternal_vaccine_reduction_rounded = abs(burden_dataset_applied$maternal_vaccine_reduction_rounded)
+burden_dataset_applied_U1$mat_vax_reduction_u1  = abs(burden_dataset_applied_U1$mat_vax_reduction_u1 )
+burden_dataset_applied_U1$mat_vax_reduction_u1_rounded = abs(burden_dataset_applied_U1$mat_vax_reduction_u1_rounded)
 #####################################################################
 
 

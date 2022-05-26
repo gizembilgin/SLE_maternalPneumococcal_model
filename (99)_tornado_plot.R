@@ -1,12 +1,9 @@
-library(ggplot2)
-library(plyr)
-library(dplyr)
-library(tidyverse)
+#library(plyr)
 
 df <- read.csv("tornado.csv", header = TRUE)
 
 # original value of output
-base.value <- 484.24
+base.value <- 571       
 
 # get order of parameters according to size of intervals
 order.parameters <- df %>% arrange(UL_Difference) %>%

@@ -15,7 +15,7 @@ death_dn_U1 = health_outcome_0$effect[health_outcome_0$outcome == 'death' & heal
 death_dn_U1 = death_dn_U1/sum(death_dn_U1)
 
 sum = 0
-for (i in 1:6){sum = sum + (life_expectancy-(2*(i-1)+1)/12)*death_dn_U1[i]}
+for (i in 1:12){sum = sum + (life_expectancy-(i)/12)*death_dn_U1[i]}
 ave_YLL = sum
 
 #(B) apply discounting

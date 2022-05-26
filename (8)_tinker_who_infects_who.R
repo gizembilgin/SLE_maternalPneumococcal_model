@@ -12,8 +12,6 @@
 #rm(list=ls()) # clear global environment
 setwd("~/PhD/Research/1_maternal vaccines/pneumococcal/code/R")                              #Dell Inspiron rootpath (personal computer)
 #setwd("C:/Users/u6044061/Documents/PhD/Research/1_maternal vaccines/pneumococcal/code/R")   #Dell Latitude rootpath (ANU laptop)
-library(deSolve)
-library(dplyr)
 #####################################################################
 
 
