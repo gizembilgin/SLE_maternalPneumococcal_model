@@ -11,12 +11,14 @@ life_expectancy = 55.92 #49.5 from 2015 census, 55.92 from UN estimates for 2020
 #### (1) Calculation of YLL
 #(A) average YLL lost
 # distribution of deaths prevented
-death_dn_U1 = health_outcome_0$effect[health_outcome_0$outcome == 'death' & health_outcome_0$age_months <=12]
-death_dn_U1 = death_dn_U1/sum(death_dn_U1)
-
-sum = 0
-for (i in 1:12){sum = sum + (life_expectancy-(i)/12)*death_dn_U1[i]}
-ave_YLL = sum
+# death_dn_U1 = health_outcome_0$effect[health_outcome_0$outcome == 'death' & health_outcome_0$age_months <=12]
+# death_dn_U1 = death_dn_U1/sum(death_dn_U1)
+# 
+# sum = 0
+# for (i in 1:12){sum = sum + (life_expectancy-(i)/12)*death_dn_U1[i]}
+# ave_YLL = sum
+# here, ave_YLL = 55.60 but over engineered because this is an estimate for YLL for those <1 year of age
+ave_YLL = life_expectancy
 
 #(B) apply discounting
 #continuous approach, as per larson et al.
@@ -24,7 +26,8 @@ if (discqaly >0){ave_YLL_discounted = (1/discqaly)*(1-exp(-discqaly*ave_YLL))
 } else if (discqaly == 0){ave_YLL_discounted = ave_YLL}
 
 #(C) calculate for 100,000
-discounted_YLL = ave_YLL_discounted*burden_dataset_applied_U1[3,3] 
+discounted_YLL = ave_YLL_discounted*burden_dataset_applied_U1$mat_vax_reduction_u1[burden_dataset_applied_U1$category == "total_pneumococcal_burden" & 
+                                                                burden_dataset_applied_U1$measure == 'morality'] 
 
 
 

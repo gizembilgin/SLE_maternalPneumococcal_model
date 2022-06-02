@@ -3,7 +3,7 @@
 df <- read.csv("tornado.csv", header = TRUE)
 
 # original value of output
-base.value <- 571       
+base.value <- 570       
 
 # get order of parameters according to size of intervals
 order.parameters <- df %>% arrange(UL_Difference) %>%
@@ -28,9 +28,9 @@ df.2 <- df %>%
 
 # create plot
 
-#png(width = 600, height = 300)
+#png(width = 800, height = 400)
 options(scipen=999) #turn off scientific notation
-ggplot() + 
+plot = ggplot() + 
   geom_rect(data = df.2, 
             aes(ymax=ymax, ymin=ymin, xmax=xmax, xmin=xmin, fill=type)) +
   theme_bw() + 
@@ -44,3 +44,6 @@ ggplot() +
   coord_flip() + 
   geom_hline(mapping = NULL, yintercept = 526.51, linetype='dashed')
 #dev.off()
+plot
+
+#ggsave(width = 80, height = 40, filename = 'tornado_plot.png', units='mm')

@@ -17,6 +17,7 @@ price_per_dose = 8.63  # 8.63 compared to 2.90 GAVI price for PCV (sensitivity a
 #price_per_dose = 4.5
 #price_per_dose = 0.137
 #price_per_dose = 2.90*8.63/14.5
+#price_per_dose = 8.63*0.92
 
 wastage = 0.05               # % of doses (default 0.05)
 
