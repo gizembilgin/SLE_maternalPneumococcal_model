@@ -1,6 +1,6 @@
 ###################################################################
-### This is the beta optimisation loop                          ###                                      
-### The program fits beta to the baseline prevalence            ###
+### The program fits beta to the baseline prevalence  was used  ###
+### for debugging who infects who in the transmission model     ###
 ###                                                             ###
 ### Author: Gizem Mayis Bilgin                                  ###
 ### Last update: 20/08/2021                                     ###
