@@ -31,20 +31,20 @@ ARI_setting="DHS_2019"
 ari = 0.167  # proportion ARI attributable to pneumococcal, options: 0.135 (IPD probe), 0.167 (average), 0.198 (AOM probe), otherwise run (9) beta optimisation!
 pcv_effectiveness = "2021_model"  # options: 2019_model, 2021_model, 2021_random_sample 2021_upper_serotype_cov 2021_lower_serotype_cov
 
-PCV_start_bracket = c(3,4,5)    # options: c(3,5,7) original paper or c(3,4,5) revised with DHS timeliness analysis
+PCV_start_bracket = c(3,4,5)        # options: c(3,5,7) original submission of paper 1 or c(3,4,5) revised with DHS timeliness analysis
 pcv_coverage = "2019_DHS"           # options: 2017_MICS, 2019_DHS, 2019_DHS_random_sample, 2019_DHS_lower_bound, 2019_DHS_upper_bound, sensitivity_DTP, sensitivity_MCV, absent
 pop_distribution = "uniform"        # choose between "uniform" or "census"
-death_distribution = "oldest_only"  #choose between = "oldest_only" or "2019_DHS"
-pop_growth_rate =  1              # 1 confers to no growth, estimate is 1.02439 from 2015 Population and Housing Census('Thematic report on population projections')
+death_distribution = "oldest_only"  # choose between = "oldest_only" or "2019_DHS"
+pop_growth_rate =  1                # 1 confers to no growth, estimate is 1.02439 from 2015 Population and Housing Census('Thematic report on population projections')
   
 carriage_adj = 1                  # adjustment for carriage
 recov_adj = 1                     # adjustment for recovery
 recov_setting = "2021_model"      # options: 2019_model 2021_model 2021_lower 2021_upper
-carriage_setting = "2022_model"        # options: 2019_model 2021_model 2022_model
+carriage_setting = "2022_model"   # options: 2019_model 2021_model 2022_model
 mat_waning = "standard"           # choose between "standard", "slower" and "faster"
 #blunting options 0.05 (possible), 0.15 (unlikely), 0.30 (very unlikely)
-blunting_temp = 0                 # reduction in PCV efficacy as a result of maternal antibody presence
-blunting_long = 0                 # COMEBACK, need full model instead of quick workaround
+blunting_temp = 0                 # temporary reduction in PCV efficacy as a result of maternal antibody presence
+blunting_long = 0                 # ongoing reduction in PCV efficacy as a result of maternal antibody presence
 
 burden_disease ="base" #options: "base","LB","UB"
 
@@ -58,7 +58,7 @@ for (run_number in 1:complete_model_runs){
   source(paste(getwd(),"/(1)_load_model_param.R",sep=""))
   # beta is the modification factor on transmission, these values have been fitted with the optimisation function
  if (ari == 0.167){
-    beta = 0.00063     #previously = 0.000525444 (2-monthly age groups), 0.000619 (inital fit to 1 month)
+    beta = 0.00063     
   } else if (ari == 0.135){
     beta = 0.000509 
   } else if (ari == 0.198){
@@ -89,7 +89,7 @@ for (run_number in 1:complete_model_runs){
   source(paste(getwd(),"/(2)_configure_inital_state.R",sep=""))
   source(paste(getwd(),"/(3)_pneum_ode_function.R",sep=""))
   if (ageing_toggle == "cohort"){source(paste(getwd(),"/(4)_time_step.R",sep=""))
-  }else if (ageing_toggle == "daily"){source(paste(getwd(),"/(4)_time_step_incremental.R",sep=""))}
+  }else if (ageing_toggle == "daily"){source(paste(getwd(),"/(4)_time_step_incremental.R",sep=""))} #sensitivity analysis requested by reviewer of paper 1
   if (run_number == 1){
     incid_1000PY_vaccine_log <- tail(incidence_1000PY,1)
   }

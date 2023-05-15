@@ -20,7 +20,7 @@ times = seq(0,time_step,by=1)
 ################################################################################
 ### (A) Initalise age groups
 # configuring to demographic of Sierra Leone
-N = 8297882           # total pop size - 2021 projection from Statistics Sierra Leone, 2015 Population and Housing Census ('Thematic report on population projections')
+N = 8297882             # total pop size - 2021 projection from Statistics Sierra Leone, 2015 Population and Housing Census ('Thematic report on population projections')
 life_expectancy = 49.5  # life expectancy from latest census 2015 Population and Housing Census('Thematic report on life tables')
 
 #setting age structure
@@ -52,7 +52,7 @@ if (death_distribution == "oldest_only"){  #death rate set to birth rate
 ### (B) Initalise PCV coverage
 # pcv coverage of doses
 if (pcv_coverage == "2017_MICS"){
-  true_cov = c(92.33, 79.05, 57.26)  # data used in 2019 paper
+  true_cov = c(92.33, 79.05, 57.26)  # data used in 2019 Honours Thesis
   
 }else if (pcv_coverage == "2019_DHS"){ # from analysis of 2019 DHS data
   true_cov = c(94.44, 87.31, 80.79)
