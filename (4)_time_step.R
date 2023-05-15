@@ -21,7 +21,7 @@ sol_log <- sol
 sol_log_unedited <- sol
 
 for (increments_number in 2:num_model_increments){
-  
+
   time_now = increments_number*time_step
   
   #selecting bottom row of solution which is time=60 and then 238 classes
@@ -51,12 +51,13 @@ for (increments_number in 2:num_model_increments){
   Incid=as.matrix(state_working[(16*J+1):(17*J)])
   
   
-  prev_state <- as.data.frame(rbind(S,V1,V2,V3,Is,Iv1,Iv2,Iv3,Sm,V1m,V2m,V3m,Ism,Iv1m,Iv2m,Iv3m))
+  prev_state <- as.data.frame(t(cbind(S,V1,V2,V3,Is,Iv1,Iv2,Iv3,Sm,V1m,V2m,V3m,Ism,Iv1m,Iv2m,Iv3m)))
   row.names(prev_state) <- NULL
   row.names(prev_state) <- c("S","V1","V2","V3","Is","Iv1","Iv2","Iv3","Sm","V1m","V2m","V3m","Ism","Iv1m","Iv2m","Iv3m")
   
   
   #initalise next state
+  prev_state <- sapply(prev_state, as.numeric)
   next_state=prev_state
   
   if (time_now %% ageing_step == 0){
@@ -141,6 +142,7 @@ for (increments_number in 2:num_model_increments){
   }
   }
   
+
   if (round(sum(next_state)) != round(sum(prev_state))){stop('population fluctating! next_state !=prev_state')}
   if (round(sum(next_state)) != N){stop('population fluctating! pop != next_state')}
   
@@ -193,7 +195,8 @@ for (i in 1:num_age_groups){
 ### PREVALENCE CALCULATIONS
 prevalence=rep(0,num_age_groups)
 for (i in 1:num_age_groups){
-  total_infected = Is[1,i]+Iv1[1,i]+Iv2[1,i]+Iv3[1,i]+Ism[1,i]+Iv1m[1,i]+Iv2m[1,i]+Iv3m[1,i]
+  total_infected = as.numeric(Is[i])+as.numeric(Iv1[i])+as.numeric(Iv2[i])+as.numeric(Iv3[i])+
+    as.numeric(Ism[i])+as.numeric(Iv1m[i])+as.numeric(Iv2m[i])+as.numeric(Iv3m[i])
   prevalence[i]=100*total_infected/P_inital[i]
 
 }
