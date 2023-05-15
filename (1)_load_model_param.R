@@ -44,7 +44,7 @@ if (death_distribution == "oldest_only"){  #death rate set to birth rate
   mu = rep(0,num_age_groups)
   mu[num_age_groups] = nu
 } else if (death_distribution == "2019_DHS"){
-  mu_import<-read.csv("death_rates.csv") #age distribution of deaths
+  mu_import<-read.csv("1_inputs/death_rates.csv") #age distribution of deaths
   mu=nu*(mu_import[,3]/100)
 }
 
@@ -130,13 +130,13 @@ if (pcv_effectiveness == "2019_model"){ #conservative estimate, Cochrane review 
 # disease characteristics include: carriage, recovery, transmission probability and contact 
 
 ### (A) Carriage
-carriage_import<-read.csv("carriage_by_age.csv") #data frame of carriage by age
+carriage_import<-read.csv("1_inputs/carriage_by_age.csv") #data frame of carriage by age
 carriage = carriage_import$carriage
 carriage=carriage_adj*carriage #set up for sensitivity analysis
 
 
 ### (B) Recovery
-recovery_import<-read.csv("recovery_by_age.csv") #data frame of recovery time by age
+recovery_import<-read.csv("1_inputs/recovery_by_age.csv") #data frame of recovery time by age
 
 if (recov_setting == "2019_model"){
   recovery=recovery_import[,2]
@@ -151,18 +151,18 @@ recovery=recov_adj*recovery #set up for sensitivity analysis
 
 
 ### (C) Contact matrix
-contact_matrix <- read.csv("contact_matrix_v3.csv",header=TRUE)
+contact_matrix <- read.csv("1_inputs/contact_matrix_v3.csv",header=TRUE)
 contact_matrix = contact_matrix[-1]
 
 if (covid_sensitivity == "on"){
-  contact_modification <- read.csv("contact_matrix_covid.csv",header=TRUE) #stores % reduction of contact
+  contact_modification <- read.csv("1_inputs/contact_matrix_covid.csv",header=TRUE) #stores % reduction of contact
   contact_matrix= contact_matrix*(1-contact_modification[-1])
 }
 
 
 
 ### (D) Transmission probability from contact
-tranmission_probab <- read.csv("transmission_matrix_2022.csv",header=TRUE)
+tranmission_probab <- read.csv("1_inputs/transmission_matrix_2022.csv",header=TRUE)
 
 contact_transmission=contact_matrix*tranmission_probab[-1]
 
@@ -176,7 +176,7 @@ if (sum(contact_transmission[,]>1)>0){
 ################################################################################
 #(A) importing DHS ARI prevalence data
 #importing DHS data for prevalence of ARI in children < 60 months
-ARI_import<-read.csv("ARI_prevalence.csv") #data frame of recovery time by age
+ARI_import<-read.csv("1_inputs/ARI_prevalence.csv") #data frame of recovery time by age
 
 if (ARI_setting == "DHS_2013"){
   ARI_import<-ARI_import[,c(1,2)]

@@ -1,6 +1,6 @@
-if (burden_disease == "base"){burden_dataset <- read.csv("health_outcomes_num_SL.csv",header=TRUE)
-} else if (burden_disease == "LB"){burden_dataset <- read.csv("health_outcomes_num_SL_LB.csv",header=TRUE)
-}else if (burden_disease == "UB"){burden_dataset <- read.csv("health_outcomes_num_SL_UB.csv",header=TRUE)
+if (burden_disease == "base"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL.csv",header=TRUE)
+} else if (burden_disease == "LB"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL_LB.csv",header=TRUE)
+}else if (burden_disease == "UB"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL_UB.csv",header=TRUE)
 }
 
 #need to multiply % reduction in cases under five with burden under five

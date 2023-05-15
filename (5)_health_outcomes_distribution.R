@@ -41,7 +41,7 @@ cdf_deaths = data.frame(outcome = paste("death"),age_months = age_group_list, pe
 ################################################################################
 #NB: LIC and LDC all the agree for this list of countries
 
-outcomes_dataset <- read.csv("health_outcomes.csv",header=TRUE)
+outcomes_dataset <- read.csv("1_inputs/health_outcomes.csv",header=TRUE)
 outcomes_list <- unique(outcomes_dataset$outcome)
 plot_list = list()
 plot_list2 = list()
@@ -171,7 +171,7 @@ cdf_outcome_final <- cdf_outcome_final %>%
   arrange(outcome,age_months)%>%
   mutate(percent_interval = percent_cum - lag(percent_cum,default=0))
 
-#write.csv(cdf_outcome_final, file = 'cdf final.csv')
+#write.csv(cdf_outcome_final, file = 'x_results/cdf final.csv')
 ################################################################################
 
 

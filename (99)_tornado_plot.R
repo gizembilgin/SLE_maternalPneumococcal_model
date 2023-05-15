@@ -1,6 +1,6 @@
 #library(plyr)
 
-df <- read.csv("tornado.csv", header = TRUE)
+df <- read.csv("x_results/tornado.csv", header = TRUE)
 
 # original value of output
 base.value <- 570       
@@ -28,7 +28,7 @@ df.2 <- df %>%
 
 # create plot
 
-#png(width = 800, height = 400)
+png(width = 800, height = 400)
 options(scipen=999) #turn off scientific notation
 plot = ggplot() + 
   geom_rect(data = df.2, 
@@ -43,7 +43,7 @@ plot = ggplot() +
                      labels = order.parameters) +
   coord_flip() + 
   geom_hline(mapping = NULL, yintercept = 526.51, linetype='dashed')
-#dev.off()
+dev.off()
 plot
 
 #ggsave(width = 80, height = 40, filename = 'tornado_plot.png', units='mm')
