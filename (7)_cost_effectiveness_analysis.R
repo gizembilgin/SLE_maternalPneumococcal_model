@@ -1,6 +1,6 @@
 #NOTE: costs are all expressed in 2020 USD
 #COMBEBACK COUNT = <working>
-
+require(ggplot2);require(tidyverse)
 
 ###user toggles
 costing = "rand" #options: fixed, rand
