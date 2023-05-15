@@ -136,7 +136,9 @@ total_cost_care_averted=total_cost_care_averted*1 #torando plot
 
 #       (3/3) Cost-effectiveness Analysis               
 ################################################################################
-source(paste(getwd(),"/(99)_conversion to DALYs.R",sep=""))
+source(paste(getwd(),"/(function)_conversion to DALYs.R",sep=""))
+
+total_DALYs <- conversion_to_DALYs(burden_dataset_applied_U1,reduction_incidence_under_one)
 
 #Note: this will be the cost per 100,000
 cost_final = total_intervention_costs_100000 - total_cost_care_averted
