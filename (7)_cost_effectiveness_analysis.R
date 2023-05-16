@@ -41,9 +41,10 @@ OC_a = (OC_mean/OC_sd)^2 ; OC_b = (OC_sd^2)/OC_mean #6.25 and 0.152
 #plot(density(rgamma(10000000, OC_a, scale=OC_b)))
 
 if (costing == "fixed"){operational_costs_100000 = 100000*OC_mean
-} else if (costing == "rand"){operational_costs_100000 = sum(rgamma(100000, OC_a, scale=OC_b))}
+#} else if (costing == "rand"){operational_costs_100000 = sum(rgamma(100000, OC_a, scale=OC_b))}
+} else if (costing == "rand"){operational_costs_100000 = 100000*rgamma(1, OC_a, scale=OC_b)}
 
-operational_costs_100000=operational_costs_100000*1 #for torando
+operational_costs_100000=operational_costs_100000*1 #for tornado
 
 ###(C/C) Total Intervention costs
 total_intervention_costs_100000 = vaccine_cost_100000 + operational_costs_100000
@@ -113,7 +114,6 @@ if (costing == "fixed"){
   cost_averted[1] = sum(runif(averted_inpatient, min=140.16, max=405.79))
   cost_averted[2] = sum(runif(averted_inpatient_mening,min=137.71, max=396.74))
   
-  #outpatient costs
   OP_mean = 0.97; OP_sd = 0.75
   OP_a = (OP_mean/OP_sd)^2 ; OP_b = (OP_sd^2)/OP_mean #1.6, 0.59
   cost_averted[3] = sum(rgamma(averted_outpatient, OP_a, scale=OP_b))
@@ -214,7 +214,7 @@ cost_summary <-
   ) 
 
 #summary_over_runs
-summary_over_runs$average_cost[summary_over_runs$outcome == 'cost_DALY_averted']
+summary_over_runs[summary_over_runs$outcome == 'cost_DALY_averted',]
 
 # LIMITATION WARNING: this 'uncertainty' is taken from running the model x number of times with different population values for parameters
 #         True stochasticity would have each individual sample from the probability distribution (lots of computational power)
