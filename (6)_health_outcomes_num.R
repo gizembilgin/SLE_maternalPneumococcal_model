@@ -9,6 +9,7 @@ if (burden_disease == "base"){burden_dataset <- read.csv("1_inputs/health_outcom
   burden_dataset = cbind(burden_dataset, num = sampled_gamma)
   
   burden_dataset$percentage = burden_dataset$num/burden_dataset$num[burden_dataset$category == "total_pneumococcal_burden" & burden_dataset$measure == "incidence"]
+  burden_dataset = burden_dataset %>% select(category,measure,num,percentage)
 }
 
 #need to multiply % reduction in cases under five with burden under five
