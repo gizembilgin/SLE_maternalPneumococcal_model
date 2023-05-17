@@ -1,10 +1,12 @@
+#DEPENDENCIES: burden_dataset_applied_U1, reduction_incidence_under_one,mcov
 #NOTE: costs are all expressed in 2020 USD
-#COMBEBACK COUNT = <working>
+
 require(ggplot2);require(tidyverse)
 
 ###user toggles
 costing = "rand" #options: fixed, rand
 complete_CEA_runs = 1000
+if (costing == "fixed"){complete_CEA_runs = 1}
 
 
 for (run_number in 1:complete_CEA_runs){
@@ -54,7 +56,12 @@ total_intervention_costs_100000 = vaccine_cost_100000 + operational_costs_100000
 
 #       (2/3) Health system costs averted               
 ################################################################################
-# COMEBACK, code rand in health outcome AND presentation distribution
+if (costing == "fixed"){
+  burden_disease = "base"
+} else if (costing == "rand"){
+  burden_disease = "stochastic"
+}
+source(paste(getwd(),"/(6)_health_outcomes_num.R",sep=""))
 
 ###(A/D) Incidence of health outcomes/syndromes averted
 # four types of incidence averted as per Figure 1: all other ARI attributable to pneumococcal,pneumococcal pneumonia, pneumococcal meningitis, NPNM
@@ -155,8 +162,8 @@ cost_this_run = round(cost_this_run,digits=2)
 
 
 if (run_number == 1){
-  CEA_log <- cost_this_run
-  cost_log <- c(vaccine_cost_100000,operational_costs_100000,total_cost_care_averted)
+  CEA_log <- data.frame(t(cost_this_run))
+  cost_log <- data.frame(vaccine_cost_100000,operational_costs_100000,total_cost_care_averted)
 }
 if (run_number > 1){
   CEA_log <-rbind(CEA_log,cost_this_run)
@@ -168,34 +175,16 @@ rownames(CEA_log) <- NULL
 colnames(CEA_log) <- c('program_cost','cost per child','cost_case_averted','cost_DALY_averted','cost_death_averted','cost_hospo_averted')
 CEA_log <- as.data.frame(CEA_log)
 
-rownames(cost_log) <- NULL
-colnames(cost_log) <- c('vaccine_costs','operational_costs','health_system_costs')
-cost_log <- as.data.frame(cost_log)
-
-shapiro.test(CEA_log$program_cost) #p=0.271>0.05 therefore normally distributed
-#shapiro.test(cost_log$vaccine_costs)
-shapiro.test(cost_log$operational_costs)
-shapiro.test(cost_log$health_system_costs)
-
 CEA_log_long <- CEA_log %>%
   pivot_longer(
     cols = program_cost:cost_hospo_averted,
     names_to = c('outcome'),
     values_to = "cost"
   ) 
-summary_over_runs <- 
-  CEA_log_long %>%
-  group_by(outcome) %>%
-  dplyr::summarise(average_cost = round(mean(cost),digits=2), 
-                   #UCI = CI(cost)[1], 
-                   #LCI = CI(cost)[3],
-                   #UCI = round(mean(cost)+qnorm(.975)*sd(cost)/sqrt(complete_CEA_runs),digits=2),
-                   #LCI = round(mean(cost)-qnorm(.975)*sd(cost)/sqrt(complete_CEA_runs),digits=2),
-                   sd = round(sd(cost),digits=2),
-                   LPI = round(mean(cost)-qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2),
-                   UPI = round(mean(cost)+qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2)
-                   )
 
+rownames(cost_log) <- NULL
+colnames(cost_log) <- c('vaccine_costs','operational_costs','health_system_costs')
+cost_log <- as.data.frame(cost_log)
 
 cost_log_long <- cost_log %>%
   pivot_longer(
@@ -204,14 +193,38 @@ cost_log_long <- cost_log %>%
     values_to = "cost"
   ) 
 
-cost_summary <- 
-  cost_log_long %>%
-  group_by(component) %>%
-  dplyr::summarise(average_cost = round(mean(cost),digits=2), 
-                   sd = round(sd(cost),digits=2),
-                   LPI = round(mean(cost)-qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2),
-                   UPI = round(mean(cost)+qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2)
-  ) 
+if (nrow(CEA_log)>1){
+  shapiro.test(CEA_log$program_cost) #p=0.271>0.05 therefore normally distributed
+  #shapiro.test(cost_log$vaccine_costs)
+  shapiro.test(cost_log$operational_costs)
+  shapiro.test(cost_log$health_system_costs)
+  
+  summary_over_runs <- 
+    CEA_log_long %>%
+    group_by(outcome) %>%
+    dplyr::summarise(average_cost = round(mean(cost),digits=2), 
+                     #UCI = CI(cost)[1], 
+                     #LCI = CI(cost)[3],
+                     #UCI = round(mean(cost)+qnorm(.975)*sd(cost)/sqrt(complete_CEA_runs),digits=2),
+                     #LCI = round(mean(cost)-qnorm(.975)*sd(cost)/sqrt(complete_CEA_runs),digits=2),
+                     sd = round(sd(cost),digits=2),
+                     LPI = round(mean(cost)-qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2),
+                     UPI = round(mean(cost)+qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2)
+    )
+  
+  
+  
+  
+  cost_summary <- 
+    cost_log_long %>%
+    group_by(component) %>%
+    dplyr::summarise(average_cost = round(mean(cost),digits=2), 
+                     sd = round(sd(cost),digits=2),
+                     LPI = round(mean(cost)-qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2),
+                     UPI = round(mean(cost)+qt(.975,df=(complete_CEA_runs-1))*sd(cost)*sqrt(1+(1/complete_CEA_runs)),digits=2)
+    ) 
+}
+
 
 #summary_over_runs
 summary_over_runs[summary_over_runs$outcome == 'cost_DALY_averted',]

@@ -1,4 +1,5 @@
 
+### Step One: create dataset with mean, LB, UB #################################
 point <- read.csv("1_inputs/health_outcomes_num_SL.csv",header=TRUE) %>%
   rename(mean = num) %>%
   select(-percentage)
@@ -19,9 +20,11 @@ ggplot(workshop) +
   facet_grid(category~.)
 
 #CI not even, therefore lognormal or gamma fit
+#_______________________________________________________________________________
 
 
 
+### Step Two: initialise fitting function #######################################
 fit_lognormal <- function(mean,LB,UB){
   
   minimise_this_lognormal <- function(sd) {
@@ -72,14 +75,21 @@ fit_gamma <- function(mean,LB,UB){
   
   return(data.frame(gamma_shape=shape_estimate,gamma_scale=scale_estimate))
 }
+#_______________________________________________________________________________
 
 
+
+### Step Three: fit distributions ##############################################
 lognorm_param = mapply(fit_lognormal, workshop$mean, workshop$LB, workshop$UB)
 workshop = cbind(workshop,t(lognorm_param)) 
 
 gamma_param = mapply(fit_gamma, workshop$mean, workshop$LB, workshop$UB)
 workshop = cbind(workshop,t(gamma_param))
+#_______________________________________________________________________________
 
+
+
+### Step Four: check distributions ##############################################
 sampled_lognorm = mapply(rlnorm,10000000,workshop$lognorm_a , workshop$lognorm_b)
 sampled_gamma = mapply(rgamma,10000000,workshop$gamma_shape, 1/data.frame(workshop$gamma_scale))
 
@@ -88,6 +98,11 @@ num = 1
 workshop[num,c("mean","LB","UB")]
 plot(density(sampled_lognorm[,num])); quantile(sampled_lognorm[,num],probs=c(0.05,0.5,0.95)); mean(sampled_lognorm[,num])
 plot(density(sampled_gamma[,num])); quantile(sampled_gamma[,num],probs=c(0.05,0.5,0.95)); mean(sampled_gamma[,num])
+#_______________________________________________________________________________
 
+
+
+### Step Five: save best fitted distribution ###################################
 severe_outcome_distributions <- workshop %>% select(-lognorm_a,-lognorm_b)
 save(severe_outcome_distributions, file = "1_inputs/severe_outcome_distributions.Rdata")
+#_______________________________________________________________________________
