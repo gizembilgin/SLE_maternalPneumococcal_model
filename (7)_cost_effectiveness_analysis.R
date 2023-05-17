@@ -20,6 +20,7 @@ price_per_dose = 8.63  # 8.63 compared to 2.90 GAVI price for PCV (sensitivity a
 #price_per_dose = 0.137
 #price_per_dose = 2.90*8.63/14.5
 #price_per_dose = 8.63*0.92
+if ("vaccine_price" %in% names(MASTER_CONTROLS)){price_per_dose = MASTER_CONTROLS$vaccine_price}
 
 wastage = 0.05               # % of doses (default 0.05)
 
@@ -144,8 +145,12 @@ total_cost_care_averted=total_cost_care_averted*1 #torando plot
 #       (3/3) Cost-effectiveness Analysis               
 ################################################################################
 source(paste(getwd(),"/(function)_conversion to DALYs.R",sep=""))
+this_disqaly = 0.03
+if ("discounting_rate" %in% names(MASTER_CONTROLS)){this_disqaly = MASTER_CONTROLS$discounting_rate}
 
-total_DALYs <- conversion_to_DALYs(burden_dataset_applied_U1,reduction_incidence_under_one)
+total_DALYs <- conversion_to_DALYs(burden_dataset_applied_U1,
+                                   reduction_incidence_under_one,
+                                   discqaly = this_disqaly)
 
 #Note: this will be the cost per 100,000
 cost_final = total_intervention_costs_100000 - total_cost_care_averted
