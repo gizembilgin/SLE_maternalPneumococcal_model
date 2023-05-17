@@ -16,9 +16,9 @@ mathematical modelling paper in 2021; version control history is available from 
 ## Scripts included in this project
 * *1_inputs/* contains all parameter files
 * *x_results/* contains results
-* *(0)_command_desk.R* runs all sub-scripts of the transmission model to complete one standard 'run'
+* ***(0)_command_desk.R* runs all sub-scripts of the transmission model to complete one standard 'run'**
 * *(1-6)** scripts are the sub-scripts of the transmission model
-* *(7)_cost_effectiveness_analysis** runs all sub-scripts of the cost-effectiveness analysis to complete one standard 'run'
+* ***(7)_cost_effectiveness_analysis* runs all sub-scripts of the cost-effectiveness analysis to complete one standard 'run'**
 * *(command)** scripts initiate complete runs of the model
 * *(function)** scripts contain functions
 * *(mech shop)** scripts create a subset of parameters used by the model
