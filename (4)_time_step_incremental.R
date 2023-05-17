@@ -1,6 +1,6 @@
 #      This section will run the ode multiple times while aging the cohort over time
 #      This script is an alternate version of (4)_time_step to allow aging per day, rather than per months, to address
-#      sensitivity analysis requested by reviewer of paper 1
+#      sensitivity analysis requested during peeer review of paper 1
 
 SOME = 1/ageing_step #COMEBACK - if you want to merge with normal (4) time step
 parameters = c(nu=nu,

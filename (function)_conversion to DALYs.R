@@ -1,4 +1,4 @@
-#### The conversion to DALYs will take four steps
+#### This script converts model outcomes to DALYs in four steps
 #### (1) Calculation of YLL
 #### (2) Calculation of YLD
 #### (3) Application of discounting

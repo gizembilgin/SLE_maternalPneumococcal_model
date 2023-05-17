@@ -1,4 +1,6 @@
 
+### This script configures the initial state of the pneumococcal transmission model
+
 ###### (1/4) intialise maternal vaccine characteristics     
 if (maternal_vaccine_on == "Y"){
   mcov = 0.9743  # maternal vaccine coverage, currently assumed to be equal to single dose of tetanus during pregnancy

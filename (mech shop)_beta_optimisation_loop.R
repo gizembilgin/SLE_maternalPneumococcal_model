@@ -1,6 +1,7 @@
 ###################################################################
-### This is the beta optimisation loop                          ###                                      
-### The program fits beta to the baseline prevalence            ###
+### The program finds the beta which best fits the transmission ###
+###  model to the baseline pneumococcal-attributable prevalence ###
+###  of acute respiratory infections in Sierra Leone            ###
 ###                                                             ###
 ### Author: Gizem Mayis Bilgin                                  ###
 ###################################################################

@@ -1,4 +1,4 @@
-# Here we are modelling health outcomes of pneumococcal infection
+# The script creates the distribution of age-specific health outcomes of pneumococcal infection
 # NB: distributions are for those under five ONLY
 
 ###### SETUP

@@ -1,4 +1,6 @@
 
+### This script contains the differential equations for the pneumococcal transmission model
+
 pneumODE <- function(t, state, parameters){
   require(deSolve)
   

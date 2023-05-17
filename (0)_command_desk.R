@@ -1,9 +1,11 @@
 ###################################################################
-### This program models a maternal vaccine against pneumococcal ###                                      
-### The program was first developed in 2019 in MATLAB           ###
+### This program runs all sub-scripts of the pneumococcal       ###
+### model to complete one standard 'run'                        ###        
+### The program was first developed in 2019 in MATLAB,          ###
+### hence, I apologise for any matrix-focused clunky coding     ###
 ###                                                             ###
 ### Author: Gizem Mayis Bilgin                                  ###
-### Last update: 09/05/2022                                     ###
+### Last significant update: 09/05/2022                         ###
 ###################################################################
 
 

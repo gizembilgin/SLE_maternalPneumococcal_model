@@ -1,3 +1,4 @@
+### This script completes one run with a maternal vaccine
 
 incid_1000PY_vaccine_log = data.frame()
 # options: "Y", Y_higher_eff_pertut, Y_lower_eff_flu, Y_lower_cov_introduction, Y_lower_cov_ANC, Y_lower_cov_tetanus_sufficient

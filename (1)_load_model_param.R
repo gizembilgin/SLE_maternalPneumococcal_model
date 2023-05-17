@@ -1,4 +1,6 @@
 
+### This script loads all parameters of the pneumoccocal transmission model
+
 #       (0/5) Generic variables                
 ################################################################################
 num_classes = 17  # number of classes per age group (16+1 for incidence)

@@ -1,3 +1,5 @@
+### This script completes one full model run
+
 source(paste(getwd(),"/(1)_load_model_param.R",sep=""))
 
 incid_1000PY_baseline_log = data.frame()

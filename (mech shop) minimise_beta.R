@@ -1,4 +1,6 @@
 
+### This script fits a beta distribution to estimates from previous literature
+
 minimise_this_beta <- function(X) {
   mean = mean
   

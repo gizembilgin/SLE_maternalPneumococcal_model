@@ -1,3 +1,6 @@
+
+### This script fits a gamma distribution to estimates from previous literature
+
 minimise_this_gamma <- function(param) {
   shape=param[1]
   scale=param[2]

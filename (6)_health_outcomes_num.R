@@ -1,3 +1,6 @@
+
+### This script translates the impact of a maternal vaccine on incidence -> severe outcomes associated with pneumococcal 
+
 if (burden_disease == "base"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL.csv",header=TRUE)
 } else if (burden_disease == "LB"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL_LB.csv",header=TRUE)
 } else if (burden_disease == "UB"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL_UB.csv",header=TRUE)

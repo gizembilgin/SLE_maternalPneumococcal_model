@@ -1,3 +1,5 @@
+### This script completes one run without a maternal vaccine
+
 incid_1000PY_baseline_log = data.frame()
 maternal_vaccine_on = "N"
 source(paste(getwd(),"/(2)_configure_inital_state.R",sep=""))

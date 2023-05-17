@@ -1,3 +1,6 @@
+
+### This script fits a lognormal distribution to estimates from previous literature
+
 minimise_this_lognormal <- function(sd) {
   mean = mean
   mean_sq = mean^2
