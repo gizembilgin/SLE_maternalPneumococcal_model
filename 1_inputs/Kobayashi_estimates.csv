@@ -1,0 +1,5 @@
+patient_type,estimate,lower quantile,upper quantile
+inpatient pneumococcal meningitis,141.10,112.60,324.40
+inpatient pneumococcal pneumonia,128.50,114.60,311.80
+outpatient,1.00,0.00,2.90
+home care,1.30,0.00,2.90

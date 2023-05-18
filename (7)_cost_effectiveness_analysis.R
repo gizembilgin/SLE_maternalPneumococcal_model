@@ -4,10 +4,13 @@
 
 require(ggplot2);require(tidyverse)
 
+load(file = "1_inputs/healthcare_cost_estimates.Rdata")
+
 ###user toggles
 costing = "rand" #options: fixed, rand
 complete_CEA_runs = 1000
 if (costing == "fixed"){complete_CEA_runs = 1}
+if (exists("MASTER_CONTROLS") == FALSE){MASTER_CONTROLS = list()}
 
 
 for (run_number in 1:complete_CEA_runs){
@@ -112,22 +115,30 @@ averted_homeCare = incidence_averted[1] * access_homeCare +
 #initalise costs
 if (costing == "fixed"){
   cost_averted = rep(0,4) #inpatient inpatient_mening outpatient homecare
-  cost_averted[1] = 157.16 * averted_inpatient
-  cost_averted[2] = 172.57 * averted_inpatient_mening
-  cost_averted[3] = 0.97 * averted_outpatient
-  cost_averted[4] = 1.59 * averted_homeCare
+  cost_averted[1] = healthcare_cost_estimates$estimate[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia"] * averted_inpatient
+  cost_averted[2] = healthcare_cost_estimates$estimate[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis"] * averted_inpatient_mening
+  cost_averted[3] = healthcare_cost_estimates$estimate[healthcare_cost_estimates$patient_type == "outpatient"] * averted_outpatient
+  cost_averted[4] = healthcare_cost_estimates$estimate[healthcare_cost_estimates$patient_type == "home care"] * averted_homeCare
 
 } else if (costing == "rand"){
   cost_averted = rep(0,4) #inpatient inpatient_mening outpatient homecare
   
-  cost_averted[1] = sum(runif(averted_inpatient, min=140.16, max=405.79))
-  cost_averted[2] = sum(runif(averted_inpatient_mening,min=137.71, max=396.74))
+  cost_averted[1] = sum(runif(averted_inpatient,
+                              min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia"], 
+                              max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia"]))
+  cost_averted[2] = sum(runif(averted_inpatient_mening,
+                              min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis"], 
+                              max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis"]))
   
   OP_mean = 0.97; OP_sd = 0.75
   OP_a = (OP_mean/OP_sd)^2 ; OP_b = (OP_sd^2)/OP_mean #1.6, 0.59
-  cost_averted[3] = sum(rgamma(averted_outpatient, OP_a, scale=OP_b))
+  cost_averted[3] = sum(runif(averted_outpatient,
+                              min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "outpatient"], 
+                              max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "outpatient"]))
 
-  cost_averted[4] =  sum(runif(averted_homeCare,min=0, max=3.55))
+  cost_averted[4] =  sum(runif(averted_homeCare,
+                               min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "home care"], 
+                               max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "home care"]))
 }
 
 cost_averted = cost_averted
