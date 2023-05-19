@@ -8,6 +8,7 @@ if (maternal_vaccine_on == "Y"){
   #meff = 0.81   # maternal vaccine effectiveness
   
   if ("meff" %in% names(MASTER_CONTROLS)){meff = MASTER_CONTROLS$meff}
+  if ("mcov" %in% names(MASTER_CONTROLS)){mcov = MASTER_CONTROLS$mcov}
   
   
 } else if (maternal_vaccine_on == "N"){
