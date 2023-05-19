@@ -1,5 +1,11 @@
-patient_type,estimate,lower quantile,upper quantile
-inpatient pneumococcal meningitis,141.10,112.60,324.40
-inpatient pneumococcal pneumonia,128.50,114.60,311.80
-outpatient,1.00,0.00,2.90
-home care,1.30,0.00,2.90
+patient_type,cost_type,estimate,lower quantile,upper quantile
+inpatient pneumococcal meningitis,direct medical,141.1,112.6,324.4
+inpatient pneumococcal pneumonia,direct medical,128.5,114.6,311.8
+outpatient,direct medical,1,0,2.9
+home care,direct medical,1.3,0,2.9
+inpatient pneumococcal meningitis,caregiver income loss,35.3,11.4,59.4
+inpatient pneumococcal pneumonia,caregiver income loss,12.7,3.2,47.5
+inpatient pneumococcal meningitis,direct non-medical,1.9,0.4,2.9
+inpatient pneumococcal pneumonia,direct non-medical,0.6,0,1.5
+outpatient,direct non-medical,0,0,0.4
+home care,direct non-medical,0,0,0
