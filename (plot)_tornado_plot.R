@@ -10,8 +10,8 @@ queue = list(
   list(operational_cost_multiplier = 0.5, label = "Operational costs (±50%)",direction = "lower"),
   list(operational_cost_multiplier = 1.5, label = "Operational costs (±50%)",direction = "upper"),
   
-  list(healthcare_cost_multiplier = 0.2, label = "Healthcare costs (±20%)",direction = "lower"),
-  list(healthcare_cost_multiplier = 1.2, label = "Healthcare costs (±20%)",direction = "upper"),  
+  list(healthcare_cost_multiplier = 0.5, label = "Direct and in-direct medical costs (±50%)",direction = "lower"),
+  list(healthcare_cost_multiplier = 1.5, label = "Direct and in-direct medical costs (±50%)",direction = "upper"),  
   
   list(discounting_rate = 0.0, label = "Discounting (0%-5%)",direction = "lower" ),
   list(discounting_rate = 0.05, label = "Discounting (0%-5%)",direction = "upper"),
@@ -49,7 +49,7 @@ MASTER_CONTROLS = list()
 
 
 ### PLOT
-base.value <- workshop$incremental_DALYs[nrow(workshop)] # final value was baseline estimates
+base.value <- workshop$incremental_DALYs[workshop$direction == "upper" & workshop$label == "Vaccine price ($1.73-$8.63)"] # final value was baseline estimates
 
 # width of columns in plot (value between 0 and 1)
 width <- 0.95
@@ -77,6 +77,11 @@ df_2 <- workshop %>%
          xmin=as.numeric(label)-width/2,
          xmax=as.numeric(label)+width/2)
 
+# force consistency between stochastic runs
+df_2$ymin[df_2$label == "Vaccine price ($1.73-$8.63)" & df_2$direction == "upper"] = df_2$ymax[df_2$label == "Vaccine price ($1.73-$8.63)" & df_2$direction == "upper"]
+df_2$ymin[df_2$label == "Vaccine coverage (70%-97%)" & df_2$direction == "upper"] = df_2$ymax[df_2$label == "Vaccine coverage (70%-97%)"  & df_2$direction == "upper"]
+
+
 # create plot
 require(ggtext)
 options(scipen=999) #turn off scientific notation
@@ -94,4 +99,4 @@ ggplot() +
                      labels = order_parameters) +
   coord_flip() + 
   geom_hline(mapping = NULL, yintercept = 526.51, linetype='dashed') +
-  annotate("text", x = 8, y = 425, label = "GDP per capita")
+  annotate("text", x = 8, y = 415, label = "GDP per capita")
