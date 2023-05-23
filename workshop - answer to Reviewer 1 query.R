@@ -1,7 +1,12 @@
 
+### Two data frames underlying the incidence of severe disease in the model
+#(1/2) estimate of the yearly burden of pneumococcal disease in Sierra Leone (https://doi.org/10.1016/S2214-109X(18)30247-X)
 burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL.csv",header=TRUE)
-cdf_outcome_final
+#(2/2) distribution of pneumococcal disease by age 
+#Sources: SAGE review https://blogs.lshtm.ac.uk/vaccineschedules/files/6.-Russel-review-age-specific-epidemiology-PCV-schedules-session-nov11.pdf & https://doi.org/10.1016/j.vaccine.2019.07.063
+load(file = "1_inputs/cdf_outcome_final.Rdata")
 
+### Calculating incidence rates of pneumococcal-associated illness among children under 1 month, and children between 1-2 months:
 workshop = cdf_outcome_final %>%
   filter(age_months <3) %>%
   mutate(category = case_when(
