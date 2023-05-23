@@ -320,7 +320,8 @@ if (nrow(CEA_log)>1){
       sd = (cost$value/outcome$value) * sqrt((cost$sd/cost$value)^2+(outcome$sd/outcome$value)^2)
     ) %>%
       mutate(LPI = round(ICER-qt(.975,df=(complete_CEA_runs-1))*sd*sqrt(1+(1/complete_CEA_runs)),digits=2),
-             UPI = round(ICER+qt(.975,df=(complete_CEA_runs-1))*sd*sqrt(1+(1/complete_CEA_runs)),digits=2))
+             UPI = round(ICER+qt(.975,df=(complete_CEA_runs-1))*sd*sqrt(1+(1/complete_CEA_runs)),digits=2),
+             ICER_variable = this_variable)
     
     incremental_ICER = rbind(incremental_ICER,row)
   }
