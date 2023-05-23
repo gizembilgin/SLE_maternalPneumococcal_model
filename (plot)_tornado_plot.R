@@ -1,4 +1,6 @@
 
+tornado_plot = list()
+
 ### RUN SCENARIOS
 queue = list(
   list(vaccine_price = 1.73, label = "Vaccine price ($1.73-$8.63)",direction = "lower"),
@@ -49,15 +51,16 @@ MASTER_CONTROLS = list()
 
 
 ### PLOT
-base.value <- workshop$incremental_DALYs[workshop$direction == "upper" & workshop$label == "Vaccine price ($1.73-$8.63)"] # final value was baseline estimates
+base.value <- workshop$ICER[workshop$direction == "upper" & workshop$label == "Vaccine price ($1.73-$8.63)" & workshop$ICER_variable == "incremental_DALYs"] # final value was baseline estimates
 
 # width of columns in plot (value between 0 and 1)
 width <- 0.95
 order_parameters <- workshop %>%
-  select(label,incremental_DALYs,direction) %>%
+  filter(ICER_variable == "incremental_DALYs") %>%
+  select(label,ICER,direction) %>%
   group_by(label) %>%
-  summarise(LB = min(incremental_DALYs),
-            UB = max(incremental_DALYs)) %>%
+  summarise(LB = min(ICER),
+            UB = max(ICER)) %>%
   mutate(UL_Difference = UB - LB) %>% 
   arrange(UL_Difference) %>%
   mutate(label=factor(x=label, levels=label)) %>%
@@ -67,8 +70,9 @@ order_parameters <- workshop %>%
 
 # get data frame in shape for ggplot and geom_rect
 df_2 <- workshop %>%
-  select(label,incremental_DALYs,direction) %>% 
-  rename(value = incremental_DALYs) %>%
+  filter(ICER_variable == "incremental_DALYs") %>%
+  select(label,ICER,direction) %>% 
+  rename(value = ICER) %>%
   ungroup() %>%
   # create the columns for geom_rect
   mutate(label=factor(label, levels=order_parameters),
@@ -86,7 +90,7 @@ df_2$ymin[df_2$label == "Vaccine coverage (70%-97%)" & df_2$direction == "upper"
 require(ggtext)
 options(scipen=999) #turn off scientific notation
 
-ggplot() + 
+tornado_plot[[length(tornado_plot)+1]] = ggplot() + 
   geom_rect(data = df_2, 
             aes(ymax=ymax, ymin=ymin, xmax=xmax, xmin=xmin, fill=paste(direction,"estimate"))) + 
   geom_hline(yintercept = base.value) +
@@ -100,3 +104,17 @@ ggplot() +
   coord_flip() + 
   geom_hline(mapping = NULL, yintercept = 526.51, linetype='dashed') +
   annotate("text", x = 8, y = 415, label = "GDP per capita")
+
+tornado_plot[[1]] = tornado_plot[[1]] + ggtitle(("Healthcare perspective"))+ 
+  theme(plot.title = element_text(size = 15)) 
+tornado_plot[[2]] = tornado_plot[[2]] + ggtitle(("Societal perspective"))+ 
+  theme(plot.title = element_text(size = 15)) 
+
+ggarrange(
+  tornado_plot[[1]],
+  tornado_plot[[2]],
+  common.legend = TRUE,
+  legend = "bottom",
+  ncol = 1,
+  nrow = 2
+) 
