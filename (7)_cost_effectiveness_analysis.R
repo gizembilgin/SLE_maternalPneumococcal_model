@@ -10,12 +10,17 @@ load(file = "1_inputs/healthcare_cost_estimates.Rdata")
 costing = "rand" #options: fixed, rand
 perspective = "societal"
 complete_CEA_runs = 1000
+
 if (costing == "fixed"){complete_CEA_runs = 1}
 if (perspective == "healthcare"){healthcare_cost_estimates  = healthcare_cost_estimates %>% filter(cost_type == "direct medical")}
 if (exists("MASTER_CONTROLS") == FALSE){MASTER_CONTROLS = list()}
+if ("perspective" %in% names(MASTER_CONTROLS)){perspective = MASTER_CONTROLS$perspective} 
 
+cost_averted_breakdown = data.frame()
 
 for (run_number in 1:complete_CEA_runs){
+  
+  
   #       (1/3) Costs of vaccine program                 
   ################################################################################
   ###(A/C) Vaccine costs
@@ -143,50 +148,65 @@ for (run_number in 1:complete_CEA_runs){
                                  min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "home care"& healthcare_cost_estimates$cost_type == "direct medical"], 
                                  max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "home care"& healthcare_cost_estimates$cost_type == "direct medical"]))
     
+    row = data.frame(cost = sum(cost_averted), category = "direct medical")
+    cost_averted_breakdown = rbind(cost_averted_breakdown,row)
+    
     if (perspective != "healthcare"){
-      cost_averted[1] = cost_averted[1] + 
-        sum(runif(averted_inpatient,
-                  min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia" & healthcare_cost_estimates$cost_type == "caregiver income loss"], 
-                  max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia"& healthcare_cost_estimates$cost_type == "caregiver income loss"])) +
-        sum(runif(averted_inpatient,
-                  min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
-                  max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia"& healthcare_cost_estimates$cost_type == "direct non-medical"]))
       
-      cost_averted[2] = cost_averted[2] + 
-        sum(runif(averted_inpatient_mening,
-                  min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis" & healthcare_cost_estimates$cost_type == "caregiver income loss"], 
-                  max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis"& healthcare_cost_estimates$cost_type == "caregiver income loss"])) +
-        sum(runif(averted_inpatient_mening,
-                  min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
-                  max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis"& healthcare_cost_estimates$cost_type == "direct non-medical"]))
+      caregiver_income_loss = c(sum(runif(averted_inpatient,
+                                        min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia" & healthcare_cost_estimates$cost_type == "caregiver income loss"], 
+                                        max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia"& healthcare_cost_estimates$cost_type == "caregiver income loss"])),
+                                sum(runif(averted_inpatient_mening,
+                                          min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis" & healthcare_cost_estimates$cost_type == "caregiver income loss"], 
+                                          max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis"& healthcare_cost_estimates$cost_type == "caregiver income loss"])))
       
-      cost_averted[3] = cost_averted[3] + 
-        sum(runif(averted_outpatient,
-                  min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "outpatient" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
-                  max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "outpatient" & healthcare_cost_estimates$cost_type == "direct non-medical"]))
+      direct_non_medical = c(sum(runif(averted_inpatient,
+                                       min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
+                                       max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal pneumonia"& healthcare_cost_estimates$cost_type == "direct non-medical"])),
+                             sum(runif(averted_inpatient_mening,
+                                       min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
+                                       max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "inpatient pneumococcal meningitis"& healthcare_cost_estimates$cost_type == "direct non-medical"])),
+                             sum(runif(averted_outpatient,
+                                       min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "outpatient" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
+                                       max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "outpatient" & healthcare_cost_estimates$cost_type == "direct non-medical"])),
+                             sum(runif(averted_homeCare,
+                                      min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "home care" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
+                                      max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "home care" & healthcare_cost_estimates$cost_type == "direct non-medical"]))
+                             )
       
-      cost_averted[4] = cost_averted[4] + 
-        sum(runif(averted_homeCare,
-                  min=healthcare_cost_estimates$lower.quantile[healthcare_cost_estimates$patient_type == "home care" & healthcare_cost_estimates$cost_type == "direct non-medical"], 
-                  max=healthcare_cost_estimates$upper.quantile[healthcare_cost_estimates$patient_type == "home care" & healthcare_cost_estimates$cost_type == "direct non-medical"]))
+      cost_averted[1] = cost_averted[1] + caregiver_income_loss[1] + direct_non_medical[1]
+      cost_averted[2] = cost_averted[2] + caregiver_income_loss[2] + direct_non_medical[2]
+      cost_averted[3] = cost_averted[3] + direct_non_medical[3]
+      cost_averted[4] = cost_averted[4] + direct_non_medical[4]
+      
+      row = data.frame(cost = sum(direct_non_medical), category = "direct non-medical")
+      cost_averted_breakdown = rbind(cost_averted_breakdown,row)
+      
+      row = data.frame(cost = sum(caregiver_income_loss), category = "caregiver income loss")
+      cost_averted_breakdown = rbind(cost_averted_breakdown,row)
     }
   }
 
   ###(D/D) 
   total_cost_care_averted=sum(cost_averted)
-
+  
+  if ("discounting_rate" %in% names(MASTER_CONTROLS)){this_disqaly = MASTER_CONTROLS$discounting_rate
+  } else{this_disqaly = 0.03}
   if ("healthcare_cost_multiplier" %in% names(MASTER_CONTROLS)){
     total_cost_care_averted=total_cost_care_averted * MASTER_CONTROLS$healthcare_cost_multiplier
   }
   if (perspective != "healthcare"){
     life_expectancy = 55.92 #49.5 from 2015 census, 55.92 from UN estimates for 2020-2024
-    if (discqaly >0){ave_YLL_discounted = (1/discqaly)*(1-exp(-discqaly*life_expectancy))}
+    if (this_disqaly >0){ave_YLL_discounted = (1/this_disqaly)*(1-exp(-this_disqaly*life_expectancy))}
     
     GNI = 490
     
     lost_productivity_due_to_premature_mortality = GNI  * ave_YLL_discounted
     
     total_cost_care_averted = total_cost_care_averted + lost_productivity_due_to_premature_mortality* burden_dataset_applied_U1[3,3]
+    
+    row = data.frame(cost = sum(total_cost_care_averted), category = "premature mortality")
+    cost_averted_breakdown = rbind(cost_averted_breakdown,row)
   }
   ################################################################################
   
@@ -220,20 +240,22 @@ for (run_number in 1:complete_CEA_runs){
     CEA_log <- data.frame(t(cost_this_run))
     incremental_log <- data.frame(incremental_cost = cost_final, 
                                   incremental_DALYs = total_DALYs,
-                                  incremental_life_saved = -burden_dataset_applied_U1[3,3],
-                                  incremental_hosp_averted = -(averted_inpatient+averted_inpatient_mening),
-                                  incremental_case_averted = reduction_incidence_under_one)
+                                  incremental_life_saved = burden_dataset_applied_U1[3,3],
+                                  incremental_hosp_averted = (averted_inpatient+averted_inpatient_mening),
+                                  incremental_case_averted = -reduction_incidence_under_one)
     cost_log <- data.frame(vaccine_cost_100000,operational_costs_100000,total_cost_care_averted)
   }
   if (run_number > 1){
     CEA_log <-rbind(CEA_log,cost_this_run)
     incremental_log <- rbind(incremental_log,data.frame(incremental_cost = cost_final, 
                                                         incremental_DALYs = total_DALYs,
-                                                        incremental_life_saved = -burden_dataset_applied_U1[3,3],
-                                                        incremental_hosp_averted = -(averted_inpatient+averted_inpatient_mening),
-                                                        incremental_case_averted = reduction_incidence_under_one))
+                                                        incremental_life_saved = burden_dataset_applied_U1[3,3],
+                                                        incremental_hosp_averted = (averted_inpatient+averted_inpatient_mening),
+                                                        incremental_case_averted = -reduction_incidence_under_one))
     cost_log <- rbind(cost_log,c(vaccine_cost_100000,operational_costs_100000,total_cost_care_averted))
   }
+  
+  cost_averted_log = rbind(cost_averted_log,cost_averted)
 }
 
 rownames(CEA_log) <- NULL
@@ -278,13 +300,33 @@ if (nrow(CEA_log)>1){
     )
   
   incremental_summary <- incremental_log %>%
-    summarise(incremental_cost = mean(incremental_cost),
-              incremental_DALYs  = mean(incremental_DALYs),
-              incremental_life_saved = mean(incremental_life_saved),
-              incrmental_hosp_averted = mean(incremental_hosp_averted),
-              incremental_case_averted = mean(incremental_case_averted))
-  incremental_summary
-  incremental_ICER = incremental_summary$incremental_cost/incremental_summary
+    pivot_longer(cols = colnames(incremental_log),
+                 names_to = "variable",
+                 values_to = "value") %>%
+    group_by(variable) %>%
+    summarise(sd = sd(value),
+              LPI = round(mean(value)-qt(.975,df=(complete_CEA_runs-1))*sd(value)*sqrt(1+(1/complete_CEA_runs)),digits=2),
+              UPI = round(mean(value)+qt(.975,df=(complete_CEA_runs-1))*sd(value)*sqrt(1+(1/complete_CEA_runs)),digits=2),
+              value = mean(value)
+    )
+  
+  incremental_ICER = data.frame()
+  for (this_variable in unique(incremental_summary$variable[incremental_summary$variable != "incremental_cost"])){
+    outcome = incremental_summary %>% filter(variable == this_variable)
+    cost = incremental_summary %>% filter(variable == "incremental_cost")
+    
+    row = data.frame(
+      ICER = cost$value/outcome$value,
+      sd = (cost$value/outcome$value) * sqrt((cost$sd/cost$value)^2+(outcome$sd/outcome$value)^2)
+    ) %>%
+      mutate(LPI = round(ICER-qt(.975,df=(complete_CEA_runs-1))*sd*sqrt(1+(1/complete_CEA_runs)),digits=2),
+             UPI = round(ICER+qt(.975,df=(complete_CEA_runs-1))*sd*sqrt(1+(1/complete_CEA_runs)),digits=2))
+    
+    incremental_ICER = rbind(incremental_ICER,row)
+  }
+  
+  
+
   
   cost_summary <- 
     cost_log_long %>%
@@ -300,6 +342,13 @@ if (nrow(CEA_log)>1){
 #summary_over_runs
 summary_over_runs[summary_over_runs$outcome == 'cost_DALY_averted',]
 
+cost_averted_breakdown %>%
+  group_by(category) %>%
+  summarise(mean = mean(cost)) %>%
+  ungroup() %>%
+  mutate(proportion = mean/sum(mean))
+
+incremental_summary; incremental_ICER
 # LIMITATION WARNING: this 'uncertainty' is taken from running the model x number of times with different population values for parameters
 #         True stochasticity would have each individual sample from the probability distribution (lots of computational power)
 
