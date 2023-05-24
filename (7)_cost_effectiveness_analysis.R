@@ -16,7 +16,7 @@ if (perspective == "healthcare"){healthcare_cost_estimates  = healthcare_cost_es
 if (exists("MASTER_CONTROLS") == FALSE){MASTER_CONTROLS = list()}
 if ("perspective" %in% names(MASTER_CONTROLS)){perspective = MASTER_CONTROLS$perspective} 
 
-CEA_log = incremental_log = cost_averted_log = presentations_log = data.frame()
+CEA_log = incremental_log = cost_averted_log = presentations_log = burden_dataset_applied_U1_log = data.frame()
 
 for (run_number in 1:complete_CEA_runs){
   
@@ -234,6 +234,7 @@ for (run_number in 1:complete_CEA_runs){
   cost_log <- rbind(cost_log,c(vaccine_cost_100000,operational_costs_100000,total_cost_care_averted))
 
   cost_averted_log = rbind(cost_averted_log,cost_averted)
+  burden_dataset_applied_U1_log = rbind(burden_dataset_applied_U1_log,burden_dataset_applied_U1)
 }
 
 rownames(CEA_log) <- NULL
