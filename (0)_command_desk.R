@@ -56,6 +56,8 @@ covid_sensitivity = "off"          #options: "on" or "off"
 
 #       (3/4) Run model             
 ####################################################################
+incid_1000PY_log = data.frame()
+
 for (run_number in 1:complete_model_runs){
   source(paste(getwd(),"/(1)_load_model_param.R",sep=""))
   # beta is the modification factor on transmission, these values have been fitted with the optimisation function
@@ -79,12 +81,12 @@ for (run_number in 1:complete_model_runs){
                            sum(prevalence[c(13:24)])/12,
                            prevalence[25],
                            prevalence[26])
-  if (run_number == 1){
-    incid_1000PY_baseline_log <- tail(incidence_1000PY,1)
-  }
-  if (run_number > 1){
-    incid_1000PY_baseline_log <-rbind(incid_1000PY_baseline_log,tail(incidence_1000PY,1))
-  }
+  baseline_run = data.frame(t(tail(incidence_1000PY,1)))
+  colnames(baseline_run) <- "incidence"
+  baseline_run = data.frame(incidence = baseline_run, 
+                        age_group = age_group_titles,
+                        scenario = "no_maternal_vaccine")
+  incid_1000PY_log <-bind_rows(incid_1000PY_log,baseline_run)
  
    maternal_vaccine_on = "Y"     
    # options: "Y", Y_higher_eff_pertut, Y_lower_eff_flu, Y_lower_cov_introduction, Y_lower_cov_ANC, Y_lower_cov_tetanus_sufficient
@@ -92,79 +94,95 @@ for (run_number in 1:complete_model_runs){
   source(paste(getwd(),"/(3)_pneum_ode_function.R",sep=""))
   if (ageing_toggle == "cohort"){source(paste(getwd(),"/(4)_time_step.R",sep=""))
   }else if (ageing_toggle == "daily"){source(paste(getwd(),"/(4)_time_step_incremental.R",sep=""))} #sensitivity analysis requested by reviewer of paper 1
-  if (run_number == 1){
-    incid_1000PY_vaccine_log <- tail(incidence_1000PY,1)
-  }
-  if (run_number > 1){
-    incid_1000PY_vaccine_log <-rbind(incid_1000PY_vaccine_log,tail(incidence_1000PY,1))
-  }
+   matVax_run = data.frame(t(tail(incidence_1000PY,1)))
+   colnames(matVax_run) <- "incidence"
+   matVax_run = data.frame(incidence = matVax_run, 
+                         age_group = age_group_titles,
+                         scenario = "maternal_vaccine")
+   incid_1000PY_log <-bind_rows(incid_1000PY_log,matVax_run)
+   
+   vaccine_effect = rbind(matVax_run,baseline_run) %>%
+     pivot_wider(names_from = scenario,
+                 values_from = incidence) %>%
+     mutate(incidence = no_maternal_vaccine - maternal_vaccine,
+            scenario = "incremental_effect") %>%
+     select(scenario, age_group,incidence)
+   incid_1000PY_log <-bind_rows(incid_1000PY_log,vaccine_effect)
   
 }
 
-vaccine_effect_log <- incid_1000PY_vaccine_log - incid_1000PY_baseline_log
-
-incid_1000PY_vaccine <- colMeans(incid_1000PY_vaccine_log)
-incid_1000PY_baseline <- colMeans(incid_1000PY_baseline_log)
+final_results = incid_1000PY_log %>%
+  group_by(age_group,scenario) %>%
+  summarise(incidence = mean(incidence), .groups = "keep") %>%
+  pivot_wider(names_from = scenario,
+              values_from = incidence) %>%
+  mutate(incremental_percentage = incremental_effect/no_maternal_vaccine)
 #####################################################################
 
 
 #      (4/4) Tabulate results      
 ####################################################################
-vaccine_effect_abs <- colMeans(vaccine_effect_log)
-vaccine_effect_abs = round(vaccine_effect_abs, digits = 2)
-
-vaccine_effect_sd <- apply(vaccine_effect_log,2,sd)
-
-vaccine_effect_percentage <- 100*(incid_1000PY_baseline - incid_1000PY_vaccine)/incid_1000PY_baseline
-vaccine_effect_percentage = round(vaccine_effect_percentage, digits = 2)
-
-final_results <- as.data.frame(rbind(vaccine_effect_abs,vaccine_effect_sd,vaccine_effect_percentage))
-colnames(final_results) <- age_group_titles
-rownames(final_results) <-c('vaccine effect per 1000PY','vaccine effect S.D. per 1000PY','vaccine effect %')
-final_results <- round(final_results, digits = 2)
-
 collapsed_result_main <- final_results %>% 
-  mutate('3-5 months' = rowSums(final_results [,c(4:6)])/3,
-         '6-8 months' = rowSums(final_results [,c(7:9)])/3,
-         '9-11 months' = rowSums(final_results [,c(10:12)])/3) %>%
-  select('0 months','1 months','2 months','3-5 months','6-8 months','9-11 months')
+  mutate(age_group = case_when(
+    age_group %in% c("3 months",  "4 months",  "5 months") ~ "3-5 months",
+    age_group %in% c("6 months",  "7 months",  "8 months") ~ "6-8 months",
+    age_group %in% c("9 months",  "10 months",  "11 months") ~ "9-11 months",
+    TRUE ~ age_group
+  )) %>%
+  filter(age_group %in% c('0 months','1 months','2 months','3-5 months','6-8 months','9-11 months')) %>%
+  group_by(age_group) %>%
+  summarise(incremental_effect = mean(incremental_effect),
+            maternal_vaccine  = mean(maternal_vaccine ),
+            no_maternal_vaccine   = mean(no_maternal_vaccine  ),
+            incremental_percentage = mean(incremental_percentage))
 
 collapsed_result_blunting <- final_results %>% 
-  mutate('0-6 months' = rowSums(final_results [,c(1:6)])/6,
-         '6-12 months' = rowSums(final_results [,c(7:12)])/6,
-         '1-2 years' = rowSums(final_results [,c(13:24)])/12) %>%
-  select('0-6 months','6-12 months','1-2 years','5+ years')
+  mutate(age_group = case_when(
+    age_group %in% c("0 months", "1 months", "2 months","3 months",  "4 months",  "5 months") ~ "0-6 months",
+    age_group %in% c("6 months",  "7 months",  "8 months","9 months",  "10 months",  "11 months") ~ "6-12 months",
+    age_group %in% c("12 months", "13 months", "14 months","15 months",  "16 months",  "17 months",
+                     "18 months", "19 months", "20 months","21 months",  "22 months",  "23 months") ~ "1-2 years",
+    TRUE ~ age_group
+  )) %>%
+  filter(age_group %in% c("0-6 months","6-12 months", "1-2 years","5+ years")) %>%
+  group_by(age_group) %>%
+  summarise(incremental_effect = mean(incremental_effect),
+            maternal_vaccine  = mean(maternal_vaccine ),
+            no_maternal_vaccine   = mean(no_maternal_vaccine  ),
+            incremental_percentage = mean(incremental_percentage))
 
 ### CONVERT TO HEALTH OUTCOMES
 source(paste(getwd(),"/(5)_health_outcomes_distribution.R",sep=""))
 
-health_outcome_0 <- data.frame(t(final_results[3,1:12]))
-health_outcome_0 <- cbind(age_months = c(1:12), health_outcome_0)
-colnames(health_outcome_0) <- c('age_months','vaccine_effect')
-rownames(health_outcome_0) <- c()
+health_outcome_0 <- final_results %>%
+  filter(age_group %in% c("0 months", "1 months", "2 months","3 months",  "4 months",  "5 months",
+                          "6 months",  "7 months",  "8 months","9 months",  "10 months",  "11 months")) %>%
+  mutate(age_months = as.numeric(substr(age_group,1,2))+1) %>%
+  #translate to % of 'normal'
+  mutate(incremental_effect  = incremental_effect / no_maternal_vaccine,
+         maternal_vaccine = maternal_vaccine / no_maternal_vaccine,
+         no_maternal_vaccine = 1) %>%
+  left_join(cdf_outcome_final, by = "age_months") %>%
+  pivot_longer(cols = c("incremental_effect","maternal_vaccine","no_maternal_vaccine"),
+               names_to = "scenario",
+               values_to = "incidence") %>%
+  mutate(incidence = incidence*percent_interval/100) %>%
+  select(age_group,age_months,outcome,scenario,incidence)
 
-health_outcome_0 <- merge(health_outcome_0,cdf_outcome_final,by="age_months")
-health_outcome_0 <- health_outcome_0 %>%
-  mutate(effect = (vaccine_effect/100)*percent_interval)
+health_outcome_1 <- health_outcome_0 %>%
+  group_by(outcome,scenario) %>%
+  summarise(incidence = sum(incidence),.groups = "keep")
 
-health_outcome_1 <- aggregate(health_outcome_0$effect, by=list(category=health_outcome_0$outcome), FUN=sum)
 source(paste(getwd(),"/(6)_health_outcomes_num.R",sep=""))
-
-#quick fix of signs
-burden_dataset_applied$maternal_vaccine_reduction = abs(burden_dataset_applied$maternal_vaccine_reduction)
-burden_dataset_applied$maternal_vaccine_reduction_rounded = abs(burden_dataset_applied$maternal_vaccine_reduction_rounded)
-burden_dataset_applied_U1$mat_vax_reduction_u1  = abs(burden_dataset_applied_U1$mat_vax_reduction_u1 )
-burden_dataset_applied_U1$mat_vax_reduction_u1_rounded = abs(burden_dataset_applied_U1$mat_vax_reduction_u1_rounded)
 #####################################################################
 
 
 
 collapsed_result_main
 
-health_outcome_1
-burden_dataset_applied
-burden_dataset_applied_U1
-prevalence_summary
+#health_outcome_1
+#burden_dataset_applied_U1
+#prevalence_summary
 
 time.end=proc.time()[[3]]
 time.end-time.start

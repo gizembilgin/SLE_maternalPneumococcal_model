@@ -1,5 +1,6 @@
 
 ### This script translates the impact of a maternal vaccine on incidence -> severe outcomes associated with pneumococcal 
+### Dependencies: burden_disease (toggle), health_outcome_1
 
 if (burden_disease == "base"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL.csv",header=TRUE)
 } else if (burden_disease == "LB"){burden_dataset <- read.csv("1_inputs/health_outcomes_num_SL_LB.csv",header=TRUE)
@@ -15,59 +16,95 @@ if (burden_disease == "base"){burden_dataset <- read.csv("1_inputs/health_outcom
   burden_dataset = burden_dataset %>% select(category,measure,num,percentage)
 }
 
-#need to multiply % reduction in cases under five with burden under five
-maternal_vaccine_reduction = rep(0,12)
+maternal_vaccine_reduction = burden_dataset %>%
+  rename(severity = measure,
+         outcome = category) %>%
+  mutate(outcome = case_when(
+    outcome == "total_pneumococcal_burden" ~ "IPD",
+    outcome == "other_pneumoccocal" ~ "NPNM",
+    TRUE ~ outcome
+  )) %>%
+  select(-percentage)
+  
 
-###(1) Start with what we know
-#we have % reductions for IPD incid, IPD deaths, hospitalized/radiographic pneumonia (assume severe), pneum meningitis
-#reduction in total IPD incidence
-maternal_vaccine_reduction[1] = burden_dataset$num[burden_dataset$category == 'total_pneumococcal_burden' & burden_dataset$measure == 'incidence'] *
-  (health_outcome_1[health_outcome_1$category == 'IPD',2]/100)
-#IPD mortality
-maternal_vaccine_reduction[3] = burden_dataset$num[burden_dataset$category == 'total_pneumococcal_burden' & burden_dataset$measure == 'morality'] *
-  (health_outcome_1[health_outcome_1$category == 'death',2]/100)
-#severe pneumonia as average of two pneumonoia measures
-maternal_vaccine_reduction[5] = burden_dataset$num[burden_dataset$category == 'pneumoccocal_pneumonia'& burden_dataset$measure == 'severe_incidence'] *
-  (health_outcome_1[health_outcome_1$category == 'hospitalised_clinical_pneumonia',2]+
-     health_outcome_1[health_outcome_1$category == 'radiographic_pneumonia',2])/(2*100)
-#meningitis
-maternal_vaccine_reduction[7] = burden_dataset$num[burden_dataset$category == 'pneumoccocal_meningitis' & burden_dataset$measure == 'severe_incidence'] *
-  (health_outcome_1[health_outcome_1$category == 'pneumococcal_meningitis',2]/100)
-maternal_vaccine_reduction[8] = maternal_vaccine_reduction[7] #recall, all pneum men cases defined as severe
+### Start with what we know
+health_outcome_2 <- health_outcome_1 %>%
+  mutate(severity = case_when(
+    outcome == "death" ~ "morality",
+    outcome %in% c("hospitalised_clinical_pneumonia","radiographic_pneumonia") ~ "severe_incidence",
+    TRUE ~ "incidence"
+  )) %>%
+  mutate(outcome = case_when(
+    outcome == "death" ~ "IPD",
+    outcome == "pneumococcal_meningitis" ~ "pneumoccocal_meningitis", #match spelling
+    outcome %in% c("hospitalised_clinical_pneumonia","radiographic_pneumonia") ~ "pneumoccocal_pneumonia",
+    TRUE ~ outcome
+  )) %>%
+  group_by(outcome,scenario,severity) %>%
+  summarise(incidence = mean(incidence) ,.groups = "keep") %>%
+  left_join(maternal_vaccine_reduction,by=c("outcome","severity")) %>%
+  mutate(incidence = incidence *num)
 
+#recall, all pneum men cases defined as severe
+rows = health_outcome_2 %>%
+  filter(outcome == "pneumoccocal_meningitis") %>%
+  mutate(severity = "severe_incidence")
+health_outcome_2 = rbind(health_outcome_2,rows)  
+  
 
-###(2) Infer remaining (but don't attempt to place deaths)
-#(A)Have incid for IPD overall and pneum men, but not pneumonia and NPNM
+### Infer remaining categories(but don't attempt to place deaths)
+#(A) Have incid for IPD overall and pneum men, but not pneumonia and NPNM
 #Incid IPD = Incid pneum men + Incid pneumonia + Incid NPNM
-remaining_incid = maternal_vaccine_reduction[1]- maternal_vaccine_reduction[7]
-maternal_vaccine_reduction[4]=remaining_incid * (1-(burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'incidence']/
-                                                   burden_dataset$num[burden_dataset$category == 'pneumoccocal_pneumonia' & burden_dataset$measure == 'incidence']))
-maternal_vaccine_reduction[10]=remaining_incid * (burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'incidence']/
-                                                       burden_dataset$num[burden_dataset$category == 'pneumoccocal_pneumonia' & burden_dataset$measure == 'incidence'])
- 
+remaining_incid = health_outcome_2 %>%
+  select(-num) %>%
+  filter(severity == "incidence") %>%
+  pivot_wider(names_from = "outcome",
+              values_from = "incidence") %>%
+  mutate(remaining_incid = IPD - pneumoccocal_meningitis)
+
+rows =  remaining_incid %>%
+  mutate(outcome = "pneumoccocal_pneumonia",
+         incidence = remaining_incid * (1-(burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'incidence']/
+                                              burden_dataset$num[burden_dataset$category == 'pneumoccocal_pneumonia' & burden_dataset$measure == 'incidence']))) %>%
+  select(scenario,severity,outcome,incidence)
+health_outcome_2 = bind_rows(health_outcome_2,rows)  
+rows =  remaining_incid %>%
+  mutate(outcome = "NPNM",
+         incidence = remaining_incid * ((burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'incidence']/
+                                             burden_dataset$num[burden_dataset$category == 'pneumoccocal_pneumonia' & burden_dataset$measure == 'incidence']))) %>%
+  select(scenario,severity,outcome,incidence)
+health_outcome_2 = bind_rows(health_outcome_2,rows) 
+
 #(B) Ratio NPNM severe
-maternal_vaccine_reduction[11] = maternal_vaccine_reduction[10] * (burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'severe_incidence']/
-                                                                     burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'incidence']) 
+rows = health_outcome_2 %>%
+  filter(outcome == "NPNM" & severity == "incidence") %>%
+  mutate(severity = "severe_incidence") %>%
+  mutate(incidence = incidence * (burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'severe_incidence']/
+                                    burden_dataset$num[burden_dataset$category == 'other_pneumoccocal' & burden_dataset$measure == 'incidence']) )
+health_outcome_2 = bind_rows(health_outcome_2,rows) 
 
 #(C) Sum together severe incidence
-maternal_vaccine_reduction[2]=maternal_vaccine_reduction[5]+maternal_vaccine_reduction[8]+maternal_vaccine_reduction[11]
-maternal_vaccine_reduction_rounded = round(maternal_vaccine_reduction,digits=0)
+rows = health_outcome_2 %>%
+  filter(severity == "severe_incidence") %>%
+  mutate(outcome = "IPD") %>%
+  group_by(outcome,scenario,severity) %>%
+  summarise(incidence = sum(incidence),.groups="keep")
+health_outcome_2 = bind_rows(health_outcome_2,rows) 
 
-burden_dataset_applied <-cbind(burden_dataset,maternal_vaccine_reduction,maternal_vaccine_reduction_rounded)
-burden_dataset_applied <- burden_dataset_applied[-c(6,9,12),c(1,2,5,6)]
-burden_dataset_applied
 
 #note is reduction in burden of disease under five, but ALL cases averted in infants
 #assume uniform pop across U5
-
-mat_vax_reduction_u1 = maternal_vaccine_reduction*5
-mat_vax_reduction_u1_rounded = round(mat_vax_reduction_u1)
-burden_dataset_applied_U1 <-cbind(burden_dataset,mat_vax_reduction_u1,mat_vax_reduction_u1_rounded)
-burden_dataset_applied_U1 = burden_dataset_applied_U1 %>%
-  filter(measure %in% c('incidence','severe_incidence') | (measure == "morality" & category == "total_pneumococcal_burden")) %>%
-  select(-percentage,-num,)
+burden_dataset_applied_U1 = health_outcome_2 %>% select(-num)
+burden_dataset_applied_U1$incidence = burden_dataset_applied_U1$incidence*5
 
 # reduction in cases under one
-reduction_incidence_under_one = mean(as.numeric(final_results[1,1:12]))
-reduction_incidence_under_one = reduction_incidence_under_one*100 #now in 100,000
+reduction_incidence_under_one = final_results %>%
+  filter(age_group %in% c("0 months", "1 months", "2 months","3 months",  "4 months",  "5 months",
+                          "6 months",  "7 months",  "8 months","9 months",  "10 months",  "11 months")) %>%
+  pivot_longer(cols = c("incremental_effect","maternal_vaccine","no_maternal_vaccine"),
+               names_to = "scenario",
+               values_to = "incidence") %>%
+  group_by(scenario) %>%
+  summarise(incidence = 100*mean(incidence))#now in 100,000
+
 

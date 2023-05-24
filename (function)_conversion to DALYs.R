@@ -28,10 +28,12 @@ conversion_to_DALYs <- function(this_burden_dataset_applied_U1,
   } else if (discqaly == 0){ave_YLL_discounted = ave_YLL}
   
   #(C) calculate for 100,000
-  discounted_YLL = ave_YLL_discounted*this_burden_dataset_applied_U1$mat_vax_reduction_u1[this_burden_dataset_applied_U1$category == "total_pneumococcal_burden" & 
-                                                                                            this_burden_dataset_applied_U1$measure == 'morality'] 
-  
-  
+  discounted_YLL = this_burden_dataset_applied_U1 %>%
+    filter(severity == "morality") %>%
+    mutate(estimate = incidence * ave_YLL_discounted) %>%
+    ungroup() %>%
+    select(scenario,estimate)
+
   
   #### (2) Calculation of YLD
   #(A) short term respiratory illness
@@ -39,32 +41,58 @@ conversion_to_DALYs <- function(this_burden_dataset_applied_U1,
     resp_length = 10/365
     severe_resp_wt = 0.133
     mod_resp_wt = 0.051
-    respt_YLD = this_burden_dataset_applied_U1[1,3]*severe_resp_wt+(-this_reduction_incidence_under_one-this_burden_dataset_applied_U1[1,3])*mod_resp_wt
-    respt_YLD = respt_YLD*resp_length
     
+    respt_YLD = this_burden_dataset_applied_U1 %>%
+      filter(severity == "incidence" & outcome == "IPD") %>%
+      rename(IPD = incidence) %>%
+      left_join(this_reduction_incidence_under_one, by = "scenario") %>%
+      mutate(estimate = IPD * severe_resp_wt + (incidence - IPD) * mod_resp_wt) %>%
+      mutate(estimate = estimate * resp_length) %>%
+      ungroup() %>%
+      select(scenario,estimate)
+
   } else if (costing == "rand"){
     resp_length = rgamma(1,shape = 21.232443, scale = 0.491891)/365
-    severe_resp = sum(rbeta(this_burden_dataset_applied_U1[1,3],13.29,86.62))
-    mod_resp = sum(rbeta((-this_reduction_incidence_under_one-this_burden_dataset_applied_U1[1,3]),5.09,94.77))
-    respt_YLD = (severe_resp + mod_resp) * resp_length
+    
+    respt_YLD = this_burden_dataset_applied_U1 %>%
+      filter(severity == "incidence" & outcome == "IPD") %>%
+      rename(IPD = incidence) %>%
+      left_join(this_reduction_incidence_under_one, by = "scenario") %>%
+      mutate(nonIPD = incidence - IPD,
+             estimate = 0)
+    
+    for (row in 1:nrow(respt_YLD)){
+      respt_YLD$estimate[row] = sum(rbeta(respt_YLD$IPD[row],13.29,86.62)) + sum(rbeta(respt_YLD$nonIPD[row],5.09,94.77))
+    }
+    respt_YLD$estimate = respt_YLD$estimate  * resp_length
   }
   
-  
-  
-  
-  
+
   
   #(B) long term sequlae
   # ave_YLL is years of life left
   if (costing == "fixed"){
     seq_prob = 0.247
     seq_wt = 0.542
-    num_seq = seq_prob * this_burden_dataset_applied_U1[this_burden_dataset_applied_U1$category == 'pneumoccocal_meningitis' & this_burden_dataset_applied_U1$measure == 'incidence' , 3]
-    seq_YLD = ave_YLL_discounted * seq_wt *num_seq
+    
+    seq_YLD = this_burden_dataset_applied_U1 %>%
+      filter(outcome == "pneumoccocal_meningitis" & 
+               severity == "incidence") %>%
+      mutate(estimate = incidence * seq_prob) %>%
+      mutate(estimate = estimate * ave_YLL_discounted * seq_wt)
+
   } else if (costing == "rand"){
     seq_prob = rbeta(1,25,75)
-    num_seq = seq_prob * this_burden_dataset_applied_U1[this_burden_dataset_applied_U1$category == 'pneumoccocal_meningitis' & this_burden_dataset_applied_U1$measure == 'incidence' , 3]
-    seq_YLD = ave_YLL_discounted * sum(rbeta(num_seq,18.40972,15.55655))
+    
+    seq_YLD = this_burden_dataset_applied_U1 %>%
+      filter(outcome == "pneumoccocal_meningitis" & 
+               severity == "incidence") %>%
+      mutate(estimate = incidence * seq_prob)
+    
+    for (row in 1:nrow(seq_YLD)){
+      seq_YLD$estimate[row] = sum(rbeta(seq_YLD$estimate[row],18.40972,15.55655))
+    }
+    seq_YLD$estimate = seq_YLD$estimate * ave_YLL_discounted 
   }
   
   
@@ -73,12 +101,14 @@ conversion_to_DALYs <- function(this_burden_dataset_applied_U1,
   
   
   #### (4) Sum of YLL + YLD
-  ave_YLL*this_burden_dataset_applied_U1[3,3]; discounted_YLL
-  respt_YLD
-  seq_YLD 
+  discounted_YLL = discounted_YLL %>% mutate(DALY_source = "YLL")
+  respt_YLD  = respt_YLD %>% mutate(DALY_source = "respt_YLD")
+  seq_YLD   = seq_YLD %>% mutate(DALY_source = "seq_YLD")
   
   
-  total_DALYs = discounted_YLL + respt_YLD + seq_YLD
+  total_DALYs = bind_rows(discounted_YLL,respt_YLD,seq_YLD) %>%
+    group_by(scenario) %>%
+    summarise(estimate = sum(estimate))
   total_DALYs
   return(total_DALYs)
 }
