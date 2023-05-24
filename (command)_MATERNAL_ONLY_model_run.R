@@ -1,17 +1,17 @@
 ### This script completes one run with a maternal vaccine
 
-incid_1000PY_vaccine_log = data.frame()
+incid_1000PY_matVax_log = data.frame()
 # options: "Y", Y_higher_eff_pertut, Y_lower_eff_flu, Y_lower_cov_introduction, Y_lower_cov_ANC, Y_lower_cov_tetanus_sufficient
 source(paste(getwd(),"/(1)_load_model_param.R",sep=""))
 source(paste(getwd(),"/(2)_configure_inital_state.R",sep=""))
 source(paste(getwd(),"/(3)_pneum_ode_function.R",sep=""))
 if (ageing_toggle == "cohort"){source(paste(getwd(),"/(4)_time_step.R",sep=""))
 }else if (ageing_toggle == "daily"){source(paste(getwd(),"/(4)_time_step_incremental.R",sep=""))}
-incid_1000PY_vaccine_log <-rbind(incid_1000PY_vaccine_log,tail(incidence_1000PY,1))
+incid_1000PY_matVax_log <-rbind(incid_1000PY_matVax_log,tail(incidence_1000PY,1))
 
-vaccine_effect_log <- incid_1000PY_vaccine_log - incid_1000PY_baseline_log
+vaccine_effect_log <- incid_1000PY_matVax_log - incid_1000PY_baseline_log
 
-incid_1000PY_vaccine <- colMeans(incid_1000PY_vaccine_log)
+incid_1000PY_vaccine <- colMeans(incid_1000PY_matVax_log)
 incid_1000PY_baseline <- colMeans(incid_1000PY_baseline_log)
 #####################################################################
 
@@ -59,8 +59,3 @@ health_outcome_1 <- aggregate(health_outcome_0$effect, by=list(category=health_o
 source(paste(getwd(),"/(6)_health_outcomes_num.R",sep=""))
 
 #####################################################################
-
-# final_results [,1:6]
-# health_outcome_1
-# burden_dataset_applied
-# burden_dataset_applied_U1
