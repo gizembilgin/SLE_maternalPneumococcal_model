@@ -1,13 +1,13 @@
 category,measure,num,percentage
 total_pneumococcal_burden,incidence,1603,1
 total_pneumococcal_burden,severe_incidence,619,0.386150967
-total_pneumococcal_burden,morality,92,0.057392389
+total_pneumococcal_burden,mortality,92,0.057392389
 pneumoccocal_pneumonia,incidence,1504,0.938240799
 pneumoccocal_pneumonia,severe_incidence,585,0.364940736
-pneumoccocal_pneumonia,morality,76,0.047411104
+pneumoccocal_pneumonia,mortality,76,0.047411104
 pneumoccocal_meningitis,incidence,21,0.013100437
 pneumoccocal_meningitis,severe_incidence,21,0.013100437
-pneumoccocal_meningitis,morality,13,0.008109794
+pneumoccocal_meningitis,mortality,13,0.008109794
 other_pneumoccocal,incidence,77,0.048034934
 other_pneumoccocal,severe_incidence,13,0.008109794
-other_pneumoccocal,morality,5,0.003119152
+other_pneumoccocal,mortality,5,0.003119152

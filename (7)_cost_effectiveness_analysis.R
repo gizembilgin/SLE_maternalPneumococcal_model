@@ -186,7 +186,7 @@ for (run_number in 1:complete_CEA_runs){
     lost_productivity_due_to_premature_mortality = GNI  * ave_YLL_discounted
     
     lost_productivity_due_to_premature_mortality = burden_dataset_applied_U1 %>%
-      filter(severity == "morality") %>%
+      filter(severity == "mortality") %>%
       mutate(estimate = incidence * lost_productivity_due_to_premature_mortality,
              patient_type = "death",
              cost_type = "premature mortality") %>%
@@ -215,7 +215,7 @@ for (run_number in 1:complete_CEA_runs){
   cost_final = total_intervention_costs_100000 - total_cost_care_averted
   cost_final_per_child = cost_final /(mcov * 100000)
   cost_case_averted = cost_final/reduction_incidence_under_one$incidence[reduction_incidence_under_one$scenario == "incremental_effect"]
-  cost_death_averted = cost_final/burden_dataset_applied_U1$incidence[burden_dataset_applied_U1$scenario == "incremental_effect" & burden_dataset_applied_U1$severity == "morality"]
+  cost_death_averted = cost_final/burden_dataset_applied_U1$incidence[burden_dataset_applied_U1$scenario == "incremental_effect" & burden_dataset_applied_U1$severity == "mortality"]
   cost_per_DALY_averted = cost_final / total_DALYs$estimate[total_DALYs$scenario == "incremental_effect"]
   cost_hospo_averted = cost_final/sum(averted_inpatient$incidence[averted_inpatient$scenario == "incremental_effect"])
   
@@ -228,7 +228,7 @@ for (run_number in 1:complete_CEA_runs){
   CEA_log <-rbind(CEA_log,cost_this_run)
   incremental_log <- rbind(incremental_log,data.frame(incremental_cost = cost_final, 
                                                       incremental_DALYs = total_DALYs$estimate[total_DALYs$scenario == "incremental_effect"],
-                                                      incremental_life_saved = burden_dataset_applied_U1$incidence[burden_dataset_applied_U1$scenario == "incremental_effect" & burden_dataset_applied_U1$severity == "morality"],
+                                                      incremental_life_saved = burden_dataset_applied_U1$incidence[burden_dataset_applied_U1$scenario == "incremental_effect" & burden_dataset_applied_U1$severity == "mortality"],
                                                       incremental_hosp_averted = sum(averted_inpatient$incidence[averted_inpatient$scenario == "incremental_effect"]),
                                                       incremental_case_averted = reduction_incidence_under_one$incidence[reduction_incidence_under_one$scenario == "incremental_effect"]))
   cost_log <- rbind(cost_log,c(vaccine_cost_100000,operational_costs_100000,total_cost_care_averted))

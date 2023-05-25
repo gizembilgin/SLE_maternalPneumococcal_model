@@ -30,7 +30,7 @@ maternal_vaccine_reduction = burden_dataset %>%
 ### Start with what we know
 health_outcome_2 <- health_outcome_1 %>%
   mutate(severity = case_when(
-    outcome == "death" ~ "morality",
+    outcome == "death" ~ "mortality",
     outcome %in% c("hospitalised_clinical_pneumonia","radiographic_pneumonia") ~ "severe_incidence",
     TRUE ~ "incidence"
   )) %>%

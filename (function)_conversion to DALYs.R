@@ -29,7 +29,7 @@ conversion_to_DALYs <- function(this_burden_dataset_applied_U1,
   
   #(C) calculate for 100,000
   discounted_YLL = this_burden_dataset_applied_U1 %>%
-    filter(severity == "morality") %>%
+    filter(severity == "mortality") %>%
     mutate(estimate = incidence * ave_YLL_discounted) %>%
     ungroup() %>%
     select(scenario,estimate)

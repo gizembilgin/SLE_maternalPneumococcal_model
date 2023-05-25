@@ -17,7 +17,7 @@ workshop = cdf_outcome_final %>%
   measure = case_when(
     outcome %in% c("hospitalised_clinical_pneumonia","radiographic_pneumonia","pneumococcal_meningitis") ~ "incidence",
     outcome == "IPD" ~ "severe_incidence",
-    outcome == "death" ~ "morality"
+    outcome == "death" ~ "mortality"
   )) %>%
   left_join(burden_dataset,by = join_by(category, measure)) %>%
   select(-percent_cum,-percentage) %>%
