@@ -1,7 +1,7 @@
 # SLE_maternalPneumococcal_model
 **Associated paper(s):**
 * Modelling the impact of maternal pneumococcal vaccination on infant pneumococcal disease in low-income settings - published in Vaccine, see https://doi.org/10.1016/j.vaccine.2022.05.066
-* Cost-effectiveness analysis of a maternal pneumococcal vaccine in low-income, high-burden settings such as Sierra Leone - working paper, see preprint https://doi.org/10.1101/2022.07.25.22278016
+* Cost-effectiveness analysis of a maternal pneumococcal vaccine in low-income, high-burden settings such as Sierra Leone - published in PLOS Global Public Health, see https://doi.org/10.1371/journal.pgph.0000915
 
 ## Project overview
 Maternal pneumococcal vaccines have been proposed as a strategy for protection in early childhood before direct immunity through infant pneumococcal conjugate vaccines develop. 
